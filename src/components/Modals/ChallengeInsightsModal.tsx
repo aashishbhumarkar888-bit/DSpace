@@ -269,7 +269,7 @@ for product in results[:3]:
               <p className="text-slate-300">
                 Unlike optical cameras that record passive reflected sunlight at nanometer wavelengths (400–800 nm), Synthetic Aperture Radar (SAR) 
                 is an active, coherent microwave sensor. How bright or dark a pixel appears depends entirely on the ratio between surface roughness, 
-                dielectric permittivity ($\varepsilon$), and radar wavelength ($\lambda = 23.84\text{ cm}$).
+                dielectric permittivity (&epsilon;), and radar wavelength (&lambda; = 23.84 cm).
               </p>
             </div>
 
@@ -288,13 +288,13 @@ for product in results[:3]:
                   </div>
 
                   <div className="p-2 rounded-lg bg-[#061224] border border-border-hairline">
-                    <strong className="text-white block font-mono text-[11px]">2. Soil Moisture Dielectric Surges (ε: 4 → 28):</strong>
-                    Water has a high dielectric constant ($\varepsilon \approx 80$ vs $\varepsilon \approx 3.5$ for dry soil). Wet soil boosts backscatter reflection power by +8 to +14 dB.
+                    <strong className="text-white block font-mono text-[11px]">2. Soil Moisture Dielectric Surges (&epsilon;: 4 &rarr; 28):</strong>
+                    Water has a high dielectric constant (&epsilon; &asymp; 80 vs &epsilon; &asymp; 3.5 for dry soil). Wet soil boosts backscatter reflection power by +8 to +14 dB.
                   </div>
 
                   <div className="p-2 rounded-lg bg-[#061224] border border-border-hairline">
                     <strong className="text-white block font-mono text-[11px]">3. Millimeter Crustal Subsidence (InSAR Phase):</strong>
-                    Interferometric phase difference ($\Delta\phi$) maps land subsidence with 11.9 cm per full color fringe cycle.
+                    Interferometric phase difference (&Delta;&phi;) maps land subsidence with 11.9 cm per full color fringe cycle.
                   </div>
                 </div>
               </div>
@@ -314,12 +314,12 @@ for product in results[:3]:
 
                   <div className="p-2 rounded-lg bg-[#200A14] border border-border-hairline">
                     <strong className="text-white block font-mono text-[11px]">2. Clouds, Fog & Rain are 100% INVISIBLE:</strong>
-                    Cloud droplets ($\approx 10\text{ }\mu\text{m}$) are microscopic compared to NISAR's 24cm wavelength. Rayleigh scattering is near zero ($\propto 1/\lambda^4$), granting 99.8% cloud transparency.
+                    Cloud droplets (&asymp; 10 &mu;m) are microscopic compared to NISAR's 24cm wavelength. Rayleigh scattering is near zero (&prop; 1/&lambda;&sup4;), granting 99.8% cloud transparency.
                   </div>
 
                   <div className="p-2 rounded-lg bg-[#200A14] border border-border-hairline">
                     <strong className="text-white block font-mono text-[11px]">3. Dry Snowpack is ELECTROMAGNETICALLY TRANSPARENT:</strong>
-                    Dry snow has an extremely low dielectric constant ($\varepsilon \approx 1.5–1.8$) and low loss tangent, allowing L-band radar waves to penetrate meters deep straight to the bedrock.
+                    Dry snow has an extremely low dielectric constant (&epsilon; &asymp; 1.5–1.8) and low loss tangent, allowing L-band radar waves to penetrate meters deep straight to the bedrock.
                   </div>
                 </div>
               </div>
@@ -367,7 +367,7 @@ for product in results[:3]:
                   </tr>
                   <tr>
                     <td className="p-2.5 font-mono font-bold text-rose-400">InSAR Phase (Δφ)</td>
-                    <td className="p-2.5">Coherent wave crest shift between 12-day repeat orbits ($4\pi \Delta d / \lambda$).</td>
+                    <td className="p-2.5">Coherent wave crest shift between 12-day repeat orbits (4π Δd / λ).</td>
                     <td className="p-2.5 text-rose-300">Millimeter aquifer compaction (-19.4 mm/yr) and earthquake fault rupture fringes.</td>
                     <td className="p-2.5 text-rose-300">Fast-moving glacier ice exceeds fringe coherence; tracked with GOFF pixel offsets (325 m/yr).</td>
                   </tr>
@@ -499,3 +499,4 @@ for product in results[:3]:
     </div>
   );
 };
+
