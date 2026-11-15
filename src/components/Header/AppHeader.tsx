@@ -5,10 +5,14 @@ import {
   Maximize, 
   ChevronDown, 
   User, 
-  Microscope,
-  Play,
-  Square,
-  FileText
+  Microscope, 
+  Play, 
+  Square, 
+  FileText,
+  Bot,
+  Lock,
+  Unlock,
+  LogOut
 } from 'lucide-react';
 import { AOIScenario, AOIId, UserViewMode } from '../../types';
 
@@ -21,6 +25,11 @@ interface AppHeaderProps {
   isTourActive?: boolean;
   onToggleTour?: () => void;
   onOpenDistrictBrief?: () => void;
+  isScientistAuthenticated?: boolean;
+  scientistInfo?: { name: string; role: string; id: string } | null;
+  onOpenLoginModal?: () => void;
+  onLogoutScientist?: () => void;
+  onOpenGroqChatbot?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -32,12 +41,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   isTourActive = false,
   onToggleTour,
   onOpenDistrictBrief,
+  isScientistAuthenticated = false,
+  scientistInfo = null,
+  onOpenLoginModal,
+  onLogoutScientist,
+  onOpenGroqChatbot,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  const handleScientistClick = () => {
+    if (!isScientistAuthenticated) {
+      if (onOpenLoginModal) onOpenLoginModal();
+    } else {
+      setUserMode('pro');
     }
   };
 
@@ -78,34 +100,54 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* CENTER-RIGHT: Single-Line Segmented Audience Mode Pill */}
-      <div className="flex items-center bg-[#060D18] border border-border-hairline rounded-lg p-0.5 text-xs font-mono shadow-inner flex-shrink-0">
-        <button
-          onClick={() => setUserMode('simple')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-bold whitespace-nowrap ${
-            userMode === 'simple'
-              ? 'bg-cyan-electric text-slate-950 shadow-glow-cyan'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <User className="w-3.5 h-3.5" />
-          <span>👤 Civilian View</span>
-        </button>
+      {/* CENTER-RIGHT: Single-Line Segmented Audience Mode Pill & Scientist Badge */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center bg-[#060D18] border border-border-hairline rounded-lg p-0.5 text-xs font-mono shadow-inner">
+          <button
+            onClick={() => setUserMode('simple')}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-bold whitespace-nowrap ${
+              userMode === 'simple'
+                ? 'bg-cyan-electric text-slate-950 shadow-glow-cyan'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>👤 Civilian View</span>
+          </button>
 
-        <button
-          onClick={() => setUserMode('pro')}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-bold whitespace-nowrap ${
-            userMode === 'pro'
-              ? 'bg-cyan-electric text-slate-950 shadow-glow-cyan'
-              : 'text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Microscope className="w-3.5 h-3.5" />
-          <span>🔬 Scientist View</span>
-        </button>
+          <button
+            onClick={handleScientistClick}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-bold whitespace-nowrap ${
+              userMode === 'pro'
+                ? 'bg-cyan-electric text-slate-950 shadow-glow-cyan'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Microscope className="w-3.5 h-3.5" />
+            <span>🔬 Scientist View</span>
+            {!isScientistAuthenticated && <Lock className="w-2.5 h-2.5 opacity-60" />}
+          </button>
+        </div>
+
+        {/* Authenticated Scientist Badge */}
+        {isScientistAuthenticated && (
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-[9.5px] font-mono text-emerald-300">
+            <Unlock className="w-3 h-3 text-emerald-400" />
+            <span className="font-bold">LEVEL-4 SAR SCIENTIST</span>
+            {onLogoutScientist && (
+              <button
+                onClick={onLogoutScientist}
+                className="ml-1 text-slate-400 hover:text-rose-400"
+                title="Exit Scientist View"
+              >
+                <LogOut className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* RIGHT: Master 1-Min Tour CTA + Action Dossier + Fullscreen */}
+      {/* RIGHT: Master Tour + AI Copilot + Action Brief + Fullscreen */}
       <div className="flex items-center gap-2 flex-shrink-0">
         {/* Unified 60-Second Interactive Master Tour Button */}
         {onToggleTour && (
@@ -128,6 +170,17 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <span>🎬 1-Min Interactive Tour</span>
               </>
             )}
+          </button>
+        )}
+
+        {/* 🤖 Groq AI SAR Copilot Button */}
+        {onOpenGroqChatbot && (
+          <button
+            onClick={onOpenGroqChatbot}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-electric/20 to-purple-500/20 border border-cyan-electric/50 text-xs font-mono font-bold text-cyan-electric hover:bg-cyan-electric/30 transition-all shadow-sm whitespace-nowrap"
+          >
+            <Bot className="w-3.5 h-3.5 text-cyan-electric" />
+            <span>🤖 Ask DSpace AI</span>
           </button>
         )}
 

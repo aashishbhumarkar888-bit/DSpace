@@ -34,6 +34,10 @@
    - 7.3 Interactive Split-Screen Comparison Curtain (`⚖️ Compare View`)
    - 7.4 Plain-English Translators, Severity Meters & Micro-Glossary
    - 7.5 Official District Collector / NDMA Action Dossier
+8. [Section 8: Interactive 3D Digital Twin, Groq AI Copilot & Scientist Portal](#section-8-interactive-3d-digital-twin-groq-ai-copilot--scientist-portal)
+   - 8.1 3D Local Area Digital Twin & Vertical Physical Strata Projection
+   - 8.2 Groq API LLaMA-3.3-70B Copilot & Fallback Physics Architecture
+   - 8.3 Scientist & Admin Authentication Protocol & Level-4 Matrix Calibration
 
 ---
 
@@ -154,7 +158,7 @@ For judges, visitors, or crisis directors with zero SAR radar background, DSpace
 - **Chapter 4 (0:30–0:40): How the Result Is Calculated** — Breaks down both the civilian flashlight analogy and the exact 4-Obs WLS unmixing and InSAR phase equations.
 - **Chapter 5 (0:40–0:50): The 35ms Hydraulic Solver & Benchmark** — Cuts the NH-46 relief bottleneck, animates the draining basin, and displays the benchmark comparison table ($0.052\text{m}$ depth RMSE vs $0.290\text{m}$).
 - **Chapter 6 (0:50–1:00): Real-World Field Action Dossier** — Opens the official GPS-tagged NDMA Action Dossier for emergency field teams.
-- Features a bottom-center HUD with live elapsed timer (`00:00 / 01:00`), interactive chapter tabs, and play/pause controls.
+- Features a bottom-center HUD with live elapsed timer (`00:00 / 01:00`), interactive chapter tabs, and play/pause controls. Mounted strictly inside the left map viewport column to guarantee zero overlap with the docked inspector sidebar.
 
 ### 7.2 Zero-API-Key Esri World Satellite Imagery & Boundaries Overlay
 - Replaced third-party API-gated tile providers with 100% free, zero-rate-limit **Esri World Imagery** (`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`) combined with **Esri World Boundaries and Places** labels.
@@ -175,6 +179,28 @@ For judges, visitors, or crisis directors with zero SAR radar background, DSpace
   - Plain-English Problem Summary and Attribution Mechanism.
   - Before vs. After Impact Metrics (Villages Saved, Cropland Restored, Economic Value Preserved).
   - Prescribed Engineering Actions, Responsible Agencies, and Execution SLA.
+
+---
+
+## Section 8: Interactive 3D Digital Twin, Groq AI Copilot & Scientist Portal
+
+### 8.1 3D Local Area Digital Twin & Vertical Physical Strata Projection
+When inspecting any sector, DSpace renders an interactive 3D digital block model across 3 vertical physical strata:
+1. **Canopy & Atmospheric Stratum:** Shows the monsoon cloud deck and standing tree crowns that fade to translucency under 24cm L-Band illumination.
+2. **Surface Topography & Infrastructure Stratum:** Models the raised NH-46 embankment barrier and pooled floodwater with animated drainage streamlines.
+3. **Sub-Surface Geological Stratum:** Cross-sectional cut showing aquifer drawdown head and downward InSAR compaction vectors ($-19.4\text{ mm/yr}$).
+4. **Physical Fix Testing:** Includes a one-click **`⚡ Test Culvert Cut in 3D`** action that carves the 1,200mm siphon culvert in the 3D embankment wall and animates the draining water block.
+
+### 8.2 Groq API LLaMA-3.3-70B Copilot & Fallback Physics Architecture
+- Accessible via the **`🤖 Ask DSpace AI`** button in the header.
+- Connects to Groq's official API (`https://api.groq.com/openai/v1/chat/completions`) using the `llama-3.3-70b-versatile` model.
+- Automatically injects live scene telemetry (coordinates, selected hotspot, WLS $\chi^2$, FwDET depth RMSE, and Closure Phase) into the system prompt.
+- Includes a built-in instant context-aware physics knowledge engine that responds to 8 frequent judge questions with zero external network dependencies.
+
+### 8.3 Scientist & Admin Authentication Protocol
+- Accessed via **`🔬 Scientist View`** in the header.
+- Gated with mission credentials (`scientist@nisar.space` / `NISAR-2026`) and an instant **`⚡ Instant Judge / Scientist Demo Login (1-Click Bypass)`** button.
+- Authenticated sessions unlock Level-4 SAR telemetry, WLS covariance calibration controls, and MongoDB raw orbital pass injection.
 
 ---
 

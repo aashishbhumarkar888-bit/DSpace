@@ -14,7 +14,9 @@ import {
   Sliders,
   Layers,
   Sparkles,
-  Info
+  Info,
+  Box,
+  Radar
 } from 'lucide-react';
 
 interface RealSatelliteMapProps {
@@ -28,6 +30,7 @@ interface RealSatelliteMapProps {
   closurePhaseShieldActive: boolean;
   isBreakItNoiseActive: boolean;
   timeEpochIndex: number;
+  onOpen3DTwin?: () => void;
 }
 
 export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
@@ -41,6 +44,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
   closurePhaseShieldActive,
   isBreakItNoiseActive,
   timeEpochIndex,
+  onOpen3DTwin,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -53,7 +57,10 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
   const [curtainXPercent, setCurtainXPercent] = useState<number>(50); // 0 to 100%
   const isDraggingCurtain = useRef<boolean>(false);
 
-  // UPGRADE: Interactive Map Layer Filters
+  // Live Radar Swath Scanning Line Overlay Toggle
+  const [isRadarScanActive, setIsRadarScanActive] = useState<boolean>(true);
+
+  // Interactive Map Layer Filters
   const [layerFilters, setLayerFilters] = useState<{
     floodwater: boolean;
     subsidence: boolean;
@@ -215,6 +222,9 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
       marker.on('click', () => {
         onSelectHotspot(hs);
+        if (mapRef.current) {
+          mapRef.current.flyTo([hs.lat, hs.lng], 12.6, { duration: 1.0 });
+        }
       });
 
       marker.on('mouseover', () => {
@@ -227,7 +237,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
       markersRef.current.push(marker);
     });
-  }, [currentAOI.aoiId, selectedHotspot, isMitigationActive, layerFilters]);
+  }, [currentAOI.aoiId, selectedHotspot, isMitigationActive, layerFilters, onSelectHotspot]);
 
   // Track mouse movements & drag split curtain
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -253,7 +263,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     isDraggingCurtain.current = false;
   };
 
-  // 60-FPS Overlay Canvas Renderer: Sub-canopy flood polygons, InSAR fringes, NH-46 barrier, flow particles, loupe & split curtain
+  // 60-FPS Overlay Canvas Renderer: Live Swath, Sub-canopy flood, InSAR fringes, NH-46 barrier, flow particles, loupe & split curtain
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !mapRef.current) return;
@@ -417,6 +427,27 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
         }
       }
 
+      // 6. Live NASA-ISRO NISAR Orbital Swath Scanning Line
+      if (isRadarScanActive) {
+        const scanY = (frame * 1.8) % height;
+        ctx.beginPath();
+        ctx.moveTo(0, scanY);
+        ctx.lineTo(width, scanY);
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#00F0FF';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Swath gradient trailing shadow
+        const scanGrad = ctx.createLinearGradient(0, scanY - 35, 0, scanY);
+        scanGrad.addColorStop(0, 'rgba(0, 240, 255, 0)');
+        scanGrad.addColorStop(1, 'rgba(0, 240, 255, 0.08)');
+        ctx.fillStyle = scanGrad;
+        ctx.fillRect(0, Math.max(0, scanY - 35), width, 35);
+      }
+
       ctx.restore(); // Restore from Radar Clip
 
       // =========================================================================
@@ -547,6 +578,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     isLoupeActive,
     isCompareView,
     curtainXPercent,
+    isRadarScanActive,
     layerFilters,
     isMitigationActive,
     closurePhaseShieldActive,
@@ -573,7 +605,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      className="relative w-full h-full overflow-hidden select-none bg-[#03070E] rounded-xl border border-cyan-electric/25 shadow-2xl"
+      className="relative w-full h-full z-0 isolate overflow-hidden select-none bg-[#03070E] rounded-xl border border-cyan-electric/25 shadow-2xl"
     >
       {/* 60 FPS Physics Overlay Canvas (Layered over real Leaflet satellite map) */}
       <canvas
@@ -591,8 +623,21 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
         />
       )}
 
-      {/* Top Map Action Bar: Compare View Toggle */}
+      {/* Top Map Action Bar: Compare View Toggle + Radar Swath Toggle */}
       <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+        <button
+          onClick={() => setIsRadarScanActive((p) => !p)}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wide transition-all shadow-lg border ${
+            isRadarScanActive
+              ? 'bg-cyan-electric/20 text-cyan-electric border-cyan-electric/50'
+              : 'bg-slate-950/85 backdrop-blur-md text-slate-400 border-border-hairline'
+          }`}
+          title="Toggle NASA-ISRO NISAR orbital swath sweep line"
+        >
+          <Radar className="w-3.5 h-3.5" />
+          <span>{isRadarScanActive ? 'SWATH SWEEP [ON]' : 'SWATH [OFF]'}</span>
+        </button>
+
         <button
           onClick={() => setIsCompareView((prev) => !prev)}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold tracking-wide transition-all shadow-lg border ${
@@ -612,7 +657,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           <div className="absolute top-3 left-3 z-20 pointer-events-none px-3 py-1 rounded-md bg-amber-950/85 backdrop-blur-md border border-amber-500/40 text-amber-300 font-mono text-[10px] font-bold shadow-lg">
             ☁️ WHAT NORMAL SATELLITES SEE (CLOUDS)
           </div>
-          <div className="absolute top-3 right-44 z-20 pointer-events-none px-3 py-1 rounded-md bg-cyan-950/85 backdrop-blur-md border border-cyan-electric/40 text-cyan-electric font-mono text-[10px] font-bold shadow-lg">
+          <div className="absolute top-3 right-72 z-20 pointer-events-none px-3 py-1 rounded-md bg-cyan-950/85 backdrop-blur-md border border-cyan-electric/40 text-cyan-electric font-mono text-[10px] font-bold shadow-lg">
             ⚡ WHAT DSPACE 24cm RADAR SEES (GROUND TRUTH)
           </div>
         </>
@@ -626,10 +671,10 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
         </div>
       )}
 
-      {/* Active Hotspot Banner (Top-Left of Map - Zero Overlap!) */}
+      {/* Active Hotspot Banner with 3D Twin Trigger (Top-Left of Map) */}
       {selectedHotspot && !isCompareView && (
-        <div className="absolute top-3 left-3 z-20 max-w-sm p-2.5 rounded-xl bg-slate-950/90 backdrop-blur-xl border border-cyan-electric/40 shadow-2xl flex flex-col gap-1 pointer-events-auto">
-          <div className="flex items-center justify-between border-b border-border-hairline pb-1">
+        <div className="absolute top-3 left-3 z-20 max-w-sm p-3 rounded-xl bg-slate-950/90 backdrop-blur-xl border border-cyan-electric/40 shadow-2xl flex flex-col gap-2 pointer-events-auto">
+          <div className="flex items-center justify-between border-b border-border-hairline pb-1.5">
             <span className="text-[10px] font-mono font-bold text-cyan-electric flex items-center gap-1.5">
               <span className="w-4 h-4 rounded-full bg-cyan-electric text-slate-950 flex items-center justify-center font-bold text-[9px]">
                 {selectedHotspot.number}
@@ -640,12 +685,25 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
               {selectedHotspot.metricValue}
             </span>
           </div>
+
           <p className="text-[10.5px] font-sans text-slate-200 leading-tight">
             {selectedHotspot.description}
           </p>
-          <div className="flex items-center justify-between text-[8.5px] font-mono text-slate-400 pt-0.5">
-            <span>COORDS: {selectedHotspot.lat.toFixed(4)}°N, {selectedHotspot.lng.toFixed(4)}°E</span>
-            <span className="text-cyan-electric font-semibold">[{selectedHotspot.scale}]</span>
+
+          <div className="flex items-center justify-between pt-1 border-t border-border-hairline/60">
+            <span className="text-[8.5px] font-mono text-slate-400">
+              {selectedHotspot.lat.toFixed(4)}°N, {selectedHotspot.lng.toFixed(4)}°E
+            </span>
+            
+            {onOpen3DTwin && (
+              <button
+                onClick={onOpen3DTwin}
+                className="px-2 py-0.5 rounded-lg bg-cyan-electric/20 text-cyan-electric hover:bg-cyan-electric hover:text-slate-950 border border-cyan-electric/50 text-[10px] font-mono font-bold transition-all flex items-center gap-1 shadow-sm"
+              >
+                <Box className="w-3 h-3" />
+                <span>🧊 Open 3D Area Model</span>
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -673,7 +731,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           </p>
           <div className="text-[8.5px] font-mono text-emerald-400 flex items-center justify-between border-t border-border-hairline pt-1">
             <span>METRIC: {hoveredHotspot.metricValue}</span>
-            <span className="text-slate-400">Click beacon to inspect</span>
+            <span className="text-slate-400">Click beacon to inspect & fly</span>
           </div>
         </div>
       )}

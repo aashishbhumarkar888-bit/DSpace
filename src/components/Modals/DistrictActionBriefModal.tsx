@@ -25,8 +25,8 @@ export const DistrictActionBriefModal: React.FC<DistrictActionBriefModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl select-none animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-cyan-electric/40 rounded-2xl p-6 shadow-2xl text-slate-100 flex flex-col gap-5 my-8">
+    <div className="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 overflow-y-auto select-none animate-fadeIn">
+      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-cyan-electric/40 rounded-2xl p-6 shadow-2xl text-slate-100 flex flex-col gap-5 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-hairline pb-4">
           <div className="flex items-center gap-3">

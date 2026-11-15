@@ -22,8 +22,8 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-void/80 backdrop-blur-xl select-none">
-      <div className="relative w-full max-w-lg bg-slate-950/95 border border-cyan-electric/40 rounded-2xl p-5 shadow-2xl flex flex-col gap-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-slate-950/85 backdrop-blur-md select-none overflow-y-auto">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-950/95 border border-cyan-electric/40 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-hairline pb-3">
           <div className="flex items-center gap-2">

@@ -15,8 +15,8 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl select-none animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-gradient-to-b from-[#07111F] to-[#03070E] border border-cyan-electric/40 rounded-2xl p-6 shadow-2xl flex flex-col gap-5">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 bg-slate-950/85 backdrop-blur-md select-none animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-gradient-to-b from-[#07111F] to-[#03070E] border border-cyan-electric/40 rounded-2xl p-6 shadow-2xl flex flex-col gap-5 my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-hairline pb-4">
           <div className="flex items-center gap-2.5">
