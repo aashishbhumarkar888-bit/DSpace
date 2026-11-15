@@ -6,6 +6,8 @@ export type UserViewMode = 'simple' | 'pro';
 
 export type RightSidebarTab = 'story' | 'cascade' | 'pro_radar';
 
+export type PolarizationMode = 'HH' | 'HV' | 'RATIO' | 'INSAR';
+
 export interface HotspotBeacon {
   id: string;
   number: 1 | 2 | 3 | 4;

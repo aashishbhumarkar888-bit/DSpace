@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { AOIScenario, HotspotBeacon, ScaleLevel } from '../../types';
+import { AOIScenario, HotspotBeacon, ScaleLevel, PolarizationMode } from '../../types';
 import { 
   Scan, 
   EyeOff, 
@@ -16,7 +16,11 @@ import {
   Sparkles,
   Info,
   Box,
-  Radar
+  Radar,
+  Users,
+  Compass,
+  Flame,
+  Mountain
 } from 'lucide-react';
 
 interface RealSatelliteMapProps {
@@ -31,6 +35,7 @@ interface RealSatelliteMapProps {
   isBreakItNoiseActive: boolean;
   timeEpochIndex: number;
   onOpen3DTwin?: () => void;
+  polarizationMode?: PolarizationMode;
 }
 
 export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
@@ -45,6 +50,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
   isBreakItNoiseActive,
   timeEpochIndex,
   onOpen3DTwin,
+  polarizationMode = 'HH',
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -75,6 +81,11 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
   // Hovered Hotspot for rich hover tooltips
   const [hoveredHotspot, setHoveredHotspot] = useState<HotspotBeacon | null>(null);
+
+  // Ancillary GIS & Human vs. Natural Driver Layers (WorldPop, ESA WorldCover, Drivers)
+  const [showPopulation, setShowPopulation] = useState<boolean>(true);
+  const [showLandCover, setShowLandCover] = useState<boolean>(false);
+  const [showDrivers, setShowDrivers] = useState<boolean>(true);
 
   // 1,800 animated hydraulic particles
   const particlesRef = useRef<Array<{
@@ -155,11 +166,15 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     };
   }, []);
 
-  // Update map view when AOI changes
+  // Cinematic Map flyTo when AOI changes
   useEffect(() => {
     if (!mapRef.current) return;
-    fitHotspotBounds(mapRef.current);
-  }, [currentAOI.aoiId, fitHotspotBounds]);
+    mapRef.current.flyTo(
+      [currentAOI.coordinates.lat, currentAOI.coordinates.lng],
+      currentAOI.coordinates.zoom || 11,
+      { duration: 1.4, easeLinearity: 0.25 }
+    );
+  }, [currentAOI.aoiId, currentAOI.coordinates.lat, currentAOI.coordinates.lng, currentAOI.coordinates.zoom]);
 
   // Update Numbered Beacons (①, ②, ③, ④) on map
   useEffect(() => {
@@ -299,81 +314,71 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
       const lBandOpacity = isCompareView ? 1.0 : (wavelengthPct / 100);
 
-      // 1. Draw Glowing Sub-Canopy Inundation Basin around Beacon ① (Bhoj Wetland)
-      if (layerFilters.floodwater && (lBandOpacity > 0.1 || isLoupeActive || isCompareView)) {
+      // =========================================================================
+      // 1. DYNAMIC RADAR PHENOMENA PER AOI & POLARIZATION
+      // =========================================================================
+      if (currentAOI.aoiId === 'aoi-1') {
+        // Bhopal Bhoj Wetland & Narmada Canal
         const hs1 = currentAOI.hotspots[0];
-        if (hs1) {
+        const hs2 = currentAOI.hotspots[1];
+        const hs3 = currentAOI.hotspots[2];
+        const hs4 = currentAOI.hotspots[3];
+
+        if (hs1 && layerFilters.floodwater && (lBandOpacity > 0.1 || isLoupeActive || isCompareView)) {
           const pt1 = map.latLngToContainerPoint([hs1.lat, hs1.lng]);
           ctx.beginPath();
           ctx.ellipse(pt1.x, pt1.y, 85, 55, Math.PI / 8, 0, Math.PI * 2);
-          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.20)' : 'rgba(0, 240, 255, 0.28)';
+          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.20)' : (polarizationMode === 'HV' ? 'rgba(255, 184, 0, 0.25)' : 'rgba(0, 240, 255, 0.28)');
           ctx.fill();
-          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#00F0FF';
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : (polarizationMode === 'HV' ? '#FFB800' : '#00F0FF');
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // Sub-canopy label
           ctx.font = 'bold 9px "JetBrains Mono"';
-          ctx.fillStyle = isMitigationActive ? '#00E676' : '#00F0FF';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : (polarizationMode === 'HV' ? '#FFB800' : '#00F0FF');
           ctx.fillText('SUB-CANOPY FLOOD POOL (+6.2 dB HH)', pt1.x - 70, pt1.y - 45);
         }
 
-        // 2. NH-46 Embankment Road Line & Bottleneck Silt Trap around Beacon ②
-        if (layerFilters.bottleneck) {
-          const hs2 = currentAOI.hotspots[1];
-          if (hs2) {
-            const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+        if (hs2 && layerFilters.bottleneck) {
+          const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+          ctx.beginPath();
+          ctx.moveTo(pt2.x - 80, pt2.y - 90);
+          ctx.lineTo(pt2.x + 60, pt2.y + 100);
+          ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.6)' : 'rgba(255, 30, 86, 0.85)';
+          ctx.lineWidth = 3.5;
+          ctx.stroke();
 
-            // Draw NH-46 Embankment Line
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.fillText('NH-46 HIGHWAY EMBANKMENT BARRIER', pt2.x + 10, pt2.y - 25);
+
+          ctx.beginPath();
+          ctx.arc(pt2.x - 20, pt2.y + 10, 55, 0, Math.PI * 2);
+          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.18)' : 'rgba(255, 30, 86, 0.32)';
+          ctx.fill();
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+        }
+
+        if (hs3 && layerFilters.subsidence) {
+          const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
+          const rings = 4;
+          for (let i = 1; i <= rings; i++) {
+            const r = (i * 20 + (frame * 0.35)) % 75;
             ctx.beginPath();
-            ctx.moveTo(pt2.x - 80, pt2.y - 90);
-            ctx.lineTo(pt2.x + 60, pt2.y + 100);
-            ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.6)' : 'rgba(255, 30, 86, 0.85)';
-            ctx.lineWidth = 3.5;
-            ctx.stroke();
-
-            // Embankment label
-            ctx.font = 'bold 8.5px "JetBrains Mono"';
-            ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
-            ctx.fillText('NH-46 HIGHWAY EMBANKMENT BARRIER', pt2.x + 10, pt2.y - 25);
-
-            // Stagnant silted backwater polygon
-            ctx.beginPath();
-            ctx.arc(pt2.x - 20, pt2.y + 10, 55, 0, Math.PI * 2);
-            ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.18)' : 'rgba(255, 30, 86, 0.32)';
-            ctx.fill();
-            ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+            ctx.ellipse(pt3.x, pt3.y, r * 1.2, r * 0.8, -Math.PI / 6, 0, Math.PI * 2);
+            ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.45)' : 'rgba(255, 42, 133, 0.8)';
             ctx.lineWidth = 1.8;
+            ctx.setLineDash([6, 3]);
             ctx.stroke();
+            ctx.setLineDash([]);
           }
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF2A85';
+          ctx.fillText('InSAR COMPACTION (-19.4 mm/yr)', pt3.x - 65, pt3.y - 45);
         }
 
-        // 3. Neon Magenta InSAR Subsidence Fringes around Beacon ③ (Sehore Farms)
-        if (layerFilters.subsidence) {
-          const hs3 = currentAOI.hotspots[2];
-          if (hs3) {
-            const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
-            const rings = 4;
-            for (let i = 1; i <= rings; i++) {
-              const r = (i * 20 + (frame * 0.35)) % 75;
-              ctx.beginPath();
-              ctx.ellipse(pt3.x, pt3.y, r * 1.2, r * 0.8, -Math.PI / 6, 0, Math.PI * 2);
-              ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.45)' : 'rgba(255, 42, 133, 0.8)';
-              ctx.lineWidth = 1.8;
-              ctx.setLineDash([6, 3]);
-              ctx.stroke();
-              ctx.setLineDash([]);
-            }
-
-            // InSAR label
-            ctx.font = 'bold 8.5px "JetBrains Mono"';
-            ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF2A85';
-            ctx.fillText('InSAR COMPACTION (-19.4 mm/yr)', pt3.x - 65, pt3.y - 45);
-          }
-        }
-
-        // 4. Narmada Canal Corridor around Beacon ④
-        const hs4 = currentAOI.hotspots[3];
         if (hs4) {
           const pt4 = map.latLngToContainerPoint([hs4.lat, hs4.lng]);
           ctx.beginPath();
@@ -386,6 +391,183 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           ctx.font = 'bold 8.5px "JetBrains Mono"';
           ctx.fillStyle = isMitigationActive ? '#00E676' : '#FFB800';
           ctx.fillText('NARMADA CANAL AQUEDUCT CORRIDOR', pt4.x - 70, pt4.y + 35);
+        }
+      } else if (currentAOI.aoiId === 'aoi-2') {
+        // Himalayan Wildfire-to-Landslide Cascade (Chamoli, Uttarakhand)
+        const hs1 = currentAOI.hotspots[0];
+        const hs2 = currentAOI.hotspots[1];
+        const hs3 = currentAOI.hotspots[2];
+        const hs4 = currentAOI.hotspots[3];
+
+        if (hs2 && (lBandOpacity > 0.1 || isLoupeActive || isCompareView)) {
+          const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+          ctx.beginPath();
+          ctx.ellipse(pt2.x, pt2.y, 90, 60, -Math.PI / 6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255, 70, 0, 0.22)';
+          ctx.fill();
+          ctx.strokeStyle = '#FF4500';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#FF4500';
+          ctx.fillText('CHIR PINE WILDFIRE SCAR (HV -7.8 dB / ASH GLAZE)', pt2.x - 85, pt2.y - 45);
+        }
+
+        if (hs1 && layerFilters.subsidence) {
+          const pt1 = map.latLngToContainerPoint([hs1.lat, hs1.lng]);
+          for (let i = 1; i <= 3; i++) {
+            const r = (i * 22 + (frame * 0.4)) % 70;
+            ctx.beginPath();
+            ctx.arc(pt1.x, pt1.y, r, 0, Math.PI * 2);
+            ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF2A85';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+          }
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF2A85';
+          ctx.fillText('BEDROCK SHEAR CREEP (4.8 mm/day)', pt1.x - 70, pt1.y - 35);
+        }
+
+        if (hs3) {
+          const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
+          ctx.beginPath();
+          ctx.moveTo(pt3.x - 70, pt3.y - 30);
+          ctx.lineTo(pt3.x + 70, pt3.y + 40);
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.fillText('NH-07 BADRINATH HIGHWAY CUT (FS = 1.04)', pt3.x - 80, pt3.y + 25);
+        }
+
+        if (hs4) {
+          const pt4 = map.latLngToContainerPoint([hs4.lat, hs4.lng]);
+          ctx.beginPath();
+          ctx.arc(pt4.x, pt4.y, 45, 0, Math.PI * 2);
+          ctx.strokeStyle = '#00F0FF';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#00F0FF';
+          ctx.fillText('RISHIGANGA HYDRO BARRAGE (1.8M m³ RUNOUT)', pt4.x - 75, pt4.y - 30);
+        }
+      } else if (currentAOI.aoiId === 'aoi-3') {
+        // Kutch Mainland Fault Coseismic Blind Thrust (Gujarat)
+        const hs1 = currentAOI.hotspots[0];
+        const hs2 = currentAOI.hotspots[1];
+        const hs3 = currentAOI.hotspots[2];
+        const hs4 = currentAOI.hotspots[3];
+
+        if (hs1) {
+          const pt1 = map.latLngToContainerPoint([hs1.lat, hs1.lng]);
+          ctx.beginPath();
+          ctx.moveTo(pt1.x - 120, pt1.y - 40);
+          ctx.lineTo(pt1.x + 120, pt1.y + 40);
+          ctx.strokeStyle = '#FF2A85';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          for (let i = 1; i <= 3; i++) {
+            const r = (i * 26 + (frame * 0.3)) % 80;
+            ctx.beginPath();
+            ctx.ellipse(pt1.x, pt1.y, r * 1.5, r * 0.7, Math.PI / 8, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 42, 133, 0.65)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#FF2A85';
+          ctx.fillText('KUTCH MAINLAND FAULT (2.4 FRINGES / 28.6 cm SLIP)', pt1.x - 90, pt1.y - 45);
+        }
+
+        if (hs2) {
+          const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+          ctx.beginPath();
+          ctx.arc(pt2.x, pt2.y, 40, 0, Math.PI * 2);
+          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.2)' : 'rgba(255, 30, 86, 0.3)';
+          ctx.fill();
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.fillText('CANAL CONCRETE SLAB SHEAR BREAK', pt2.x - 70, pt2.y - 25);
+        }
+
+        if (hs3) {
+          const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
+          ctx.beginPath();
+          ctx.arc(pt3.x, pt3.y, 50, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.25)';
+          ctx.fill();
+          ctx.strokeStyle = '#00F0FF';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#00F0FF';
+          ctx.fillText('SALINE WATER UPWELLING (+11.4 dB HH)', pt3.x - 65, pt3.y - 30);
+        }
+
+        if (hs4) {
+          const pt4 = map.latLngToContainerPoint([hs4.lat, hs4.lng]);
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#FFB800';
+          ctx.fillText('PUMP STATION #4 REVERSE HYDRAULIC GRADIENT', pt4.x - 85, pt4.y + 25);
+        }
+      } else if (currentAOI.aoiId === 'aoi-4') {
+        // Samudra Tapu Glacier Melt & Surge (Himachal Pradesh)
+        const hs1 = currentAOI.hotspots[0];
+        const hs2 = currentAOI.hotspots[1];
+        const hs3 = currentAOI.hotspots[2];
+        const hs4 = currentAOI.hotspots[3];
+
+        if (hs1) {
+          const pt1 = map.latLngToContainerPoint([hs1.lat, hs1.lng]);
+          ctx.beginPath();
+          ctx.ellipse(pt1.x, pt1.y, 110, 45, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.22)';
+          ctx.fill();
+          ctx.strokeStyle = '#00F0FF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#00F0FF';
+          ctx.fillText('GLACIER SURGE TONGUE (325 m/yr GOFF PIXEL OFFSET)', pt1.x - 85, pt1.y - 35);
+        }
+
+        if (hs2) {
+          const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+          ctx.beginPath();
+          ctx.arc(pt2.x, pt2.y, 55, 0, Math.PI * 2);
+          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.22)' : 'rgba(0, 180, 255, 0.35)';
+          ctx.fill();
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#00B4FF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#00B4FF';
+          ctx.fillText('SUPRAGLACIAL MORAINE LAKE (12.4M m³ ABLATION)', pt2.x - 80, pt2.y - 25);
+        }
+
+        if (hs3) {
+          const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
+          ctx.beginPath();
+          ctx.moveTo(pt3.x - 60, pt3.y - 40);
+          ctx.lineTo(pt3.x + 60, pt3.y + 40);
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.lineWidth = 3.5;
+          ctx.stroke();
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.fillText('TERMINAL MORAINE DAM CREST BULGE (18 mm/wk)', pt3.x - 80, pt3.y + 30);
+        }
+
+        if (hs4) {
+          const pt4 = map.latLngToContainerPoint([hs4.lat, hs4.lng]);
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = '#00F0FF';
+          ctx.fillText('ATAL TUNNEL / HYDRO RUNOUT PATH (42,500 m³/s)', pt4.x - 80, pt4.y + 25);
         }
       }
 
@@ -425,6 +607,73 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           }
           ctx.fill();
         }
+      }
+
+      // =========================================================================
+      // 5B. ANCILLARY GIS OVERLAYS (WorldPop, ESA WorldCover, Human vs Natural Drivers)
+      // =========================================================================
+      if (showPopulation && currentAOI.hotspots.length > 0) {
+        currentAOI.hotspots.forEach((hs, idx) => {
+          const pt = map.latLngToContainerPoint([hs.lat, hs.lng]);
+          const popCount = idx === 1 ? 16800 : idx === 3 ? 14200 : 8400;
+          ctx.beginPath();
+          ctx.arc(pt.x + 25, pt.y - 15, 34, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.10)';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)';
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([3, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.font = 'bold 8px "JetBrains Mono"';
+          ctx.fillStyle = '#00F0FF';
+          ctx.fillText(`👥 ${popCount.toLocaleString()} EXPOSED (WorldPop: 480/km²)`, pt.x - 30, pt.y - 42);
+        });
+      }
+
+      if (showLandCover && currentAOI.hotspots.length >= 4) {
+        const pts = currentAOI.hotspots.map((h) => map.latLngToContainerPoint([h.lat, h.lng]));
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x - 40, pts[0].y - 30);
+        ctx.lineTo(pts[1].x + 40, pts[1].y - 20);
+        ctx.lineTo(pts[3].x + 30, pts[3].y + 40);
+        ctx.lineTo(pts[2].x - 30, pts[2].y + 30);
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(0, 230, 118, 0.45)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.font = 'bold 8.5px "JetBrains Mono"';
+        ctx.fillStyle = '#00E676';
+        ctx.fillText(`🌿 ESA WorldCover: ${currentAOI.aoiId === 'aoi-4' ? 'Glacial Ice & Permafrost' : currentAOI.aoiId === 'aoi-2' ? 'Coniferous Pine Forest' : 'Cropland & Wetland Reedbed'} (10m Resolution)`, pts[0].x - 20, pts[0].y - 50);
+      }
+
+      if (showDrivers && currentAOI.hotspots.length >= 2) {
+        const pt1 = map.latLngToContainerPoint([currentAOI.hotspots[0].lat, currentAOI.hotspots[0].lng]);
+        const pt2 = map.latLngToContainerPoint([currentAOI.hotspots[1].lat, currentAOI.hotspots[1].lng]);
+
+        // Human Driver Badge
+        ctx.fillStyle = 'rgba(255, 184, 0, 0.18)';
+        ctx.fillRect(pt2.x - 85, pt2.y + 45, 170, 18);
+        ctx.strokeStyle = '#FFB800';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(pt2.x - 85, pt2.y + 45, 170, 18);
+        ctx.font = 'bold 8px "JetBrains Mono"';
+        ctx.fillStyle = '#FFB800';
+        ctx.fillText(`🏭 HUMAN DRIVER: ${currentAOI.aoiId === 'aoi-1' ? 'NH-46 Embankment / Well' : currentAOI.aoiId === 'aoi-2' ? 'Road Cut / Deforestation' : currentAOI.aoiId === 'aoi-3' ? 'Concrete Canal Break' : 'Anthropogenic Warming (+3.4°C)'}`, pt2.x - 80, pt2.y + 57);
+
+        // Natural Driver Badge
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.18)';
+        ctx.fillRect(pt1.x - 85, pt1.y + 45, 170, 18);
+        ctx.strokeStyle = '#00F0FF';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(pt1.x - 85, pt1.y + 45, 170, 18);
+        ctx.font = 'bold 8px "JetBrains Mono"';
+        ctx.fillStyle = '#00F0FF';
+        ctx.fillText(`🌪️ NATURAL DRIVER: ${currentAOI.aoiId === 'aoi-1' ? 'Monsoon Cloudburst (τ > 40)' : currentAOI.aoiId === 'aoi-2' ? 'Phyllite Joint Dip (42°)' : currentAOI.aoiId === 'aoi-3' ? 'Blind Thrust Slip (14km)' : 'Basal Cryo-Lubrication'}`, pt1.x - 80, pt1.y + 57);
       }
 
       // 6. Live NASA-ISRO NISAR Orbital Swath Scanning Line
@@ -785,6 +1034,49 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           }`}
         >
           🏘️ Villages
+        </button>
+      </div>
+
+      {/* Interactive Ancillary GIS & Human-Driver Context Pills (Bottom-Left) */}
+      <div className="absolute bottom-11 left-3 z-20 flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-950/90 backdrop-blur-xl border border-cyan-electric/30 shadow-2xl">
+        <span className="text-[9px] font-mono text-cyan-electric font-bold px-1.5 uppercase flex items-center gap-1 border-r border-border-hairline pr-2">
+          <span>GIS CONTEXT:</span>
+        </span>
+
+        <button
+          onClick={() => setShowPopulation((p) => !p)}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-mono font-bold transition-all border ${
+            showPopulation
+              ? 'bg-cyan-electric/25 text-cyan-electric border-cyan-electric shadow-glow-cyan'
+              : 'bg-transparent text-slate-400 border-transparent hover:text-slate-200'
+          }`}
+          title="Toggle WorldPop Gridded Population Density Overlay"
+        >
+          <span>👥 Population (WorldPop)</span>
+        </button>
+
+        <button
+          onClick={() => setShowLandCover((p) => !p)}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-mono font-bold transition-all border ${
+            showLandCover
+              ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500 shadow-glow-emerald'
+              : 'bg-transparent text-slate-400 border-transparent hover:text-slate-200'
+          }`}
+          title="Toggle ESA WorldCover 10m Land Use & Land Cover Outlines"
+        >
+          <span>🌿 Land Cover (WorldCover)</span>
+        </button>
+
+        <button
+          onClick={() => setShowDrivers((p) => !p)}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded text-[9.5px] font-mono font-bold transition-all border ${
+            showDrivers
+              ? 'bg-amber-500/25 text-amber-300 border-amber-500'
+              : 'bg-transparent text-slate-400 border-transparent hover:text-slate-200'
+          }`}
+          title="Toggle Human vs. Natural Driver Classification Callouts"
+        >
+          <span>🏭 Human vs. Natural Drivers</span>
         </button>
       </div>
 

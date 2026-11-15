@@ -5,7 +5,8 @@ import {
   UserViewMode, 
   RightSidebarTab, 
   HotspotBeacon, 
-  OrbitalEpoch 
+  OrbitalEpoch,
+  PolarizationMode
 } from './types';
 import { AOI_SCENARIOS, CASCADE_STEPS_BY_AOI, generateOrbitalTimeline } from './data/aoiScenarios';
 import { dataService, StorageStatus } from './services/dataService';
@@ -25,6 +26,7 @@ import { DistrictActionBriefModal } from './components/Modals/DistrictActionBrie
 import { Area3DDigitalTwinModal } from './components/Modals/Area3DDigitalTwinModal';
 import { ScientistAdminLoginModal } from './components/Modals/ScientistAdminLoginModal';
 import { GroqChatbotDrawer } from './components/Drawers/GroqChatbotDrawer';
+import { ChallengeInsightsModal } from './components/Modals/ChallengeInsightsModal';
 
 import { 
   Play, 
@@ -77,6 +79,9 @@ export const App: React.FC = () => {
   // Split-Screen X-Ray Cursor Lens Toggle
   const [isLoupeActive, setIsLoupeActive] = useState<boolean>(false);
 
+  // Polarization Mode: HH Co-Pol, HV Cross-Pol, HH/HV Ratio, InSAR Phase
+  const [polarizationMode, setPolarizationMode] = useState<PolarizationMode>('HH');
+
   // 60-Day Physical Mitigation Simulation State
   const [isMitigationActive, setIsMitigationActive] = useState<boolean>(false);
 
@@ -102,6 +107,7 @@ export const App: React.FC = () => {
   const [is3DTwinOpen, setIs3DTwinOpen] = useState<boolean>(false);
   const [isScientistLoginOpen, setIsScientistLoginOpen] = useState<boolean>(false);
   const [isGroqDrawerOpen, setIsGroqDrawerOpen] = useState<boolean>(false);
+  const [isChallengeInsightsOpen, setIsChallengeInsightsOpen] = useState<boolean>(false);
 
   // 🎬 Unified 60-Second (6 Chapters × 10 Seconds) Master Tour State
   const [isTourActive, setIsTourActive] = useState<boolean>(false);
@@ -330,6 +336,7 @@ export const App: React.FC = () => {
     setIs3DTwinOpen(false);
     setIsGroqDrawerOpen(false);
     setIsScientistLoginOpen(false);
+    setIsChallengeInsightsOpen(false);
     setActiveTab('story');
     setUserMode('simple');
     setWavelengthPct(100);
@@ -404,14 +411,17 @@ export const App: React.FC = () => {
         onLogoutScientist={handleLogoutScientist}
         onOpenGroqChatbot={() => setIsGroqDrawerOpen(true)}
         onReturnHome={handleReturnHome}
+        onOpenChallengeInsights={() => setIsChallengeInsightsOpen(true)}
       />
 
-      {/* ROW 2: 48px Wavelength X-Ray Bar */}
+      {/* ROW 2: 48px Wavelength X-Ray Bar with Polarization Selector Strip */}
       <WavelengthXRayBar
         wavelengthPct={wavelengthPct}
         setWavelengthPct={setWavelengthPct}
         isLoupeActive={isLoupeActive}
         setIsLoupeActive={setIsLoupeActive}
+        polarizationMode={polarizationMode}
+        setPolarizationMode={setPolarizationMode}
       />
 
       {/* ROW 3: 1fr Main Workspace */}
@@ -433,6 +443,7 @@ export const App: React.FC = () => {
             isBreakItNoiseActive={isBreakItNoiseActive}
             timeEpochIndex={currentEpochIndex}
             onOpen3DTwin={() => setIs3DTwinOpen(true)}
+            polarizationMode={polarizationMode}
           />
 
           {/* 🎬 UNIFIED 60-SECOND INTERACTIVE MASTER TOUR HUD (Mounted strictly inside Left Map Column!) */}
@@ -662,6 +673,12 @@ export const App: React.FC = () => {
         selectedHotspot={selectedHotspot}
         wavelengthPct={wavelengthPct}
         isMitigationActive={isMitigationActive}
+      />
+
+      <ChallengeInsightsModal
+        isOpen={isChallengeInsightsOpen}
+        onClose={() => setIsChallengeInsightsOpen(false)}
+        currentAOI={currentAOI}
       />
     </div>
   );

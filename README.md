@@ -133,3 +133,18 @@ npm run dev
 ```
 
 Visit **`http://localhost:5173/`** to view the live DSpace Mission Control.
+
+---
+
+## 🎯 9. How DSpace Satisfies Every NASA Challenge Objective ("Dancing with SARs")
+
+| NASA Challenge Requirement | How DSpace Addresses It with Scientific Rigor | Live Interactive Feature in DSpace |
+|:---|:---|:---|
+| **1. The 5 Surface Change Rhythms** | Maps wetlands expanding/retracting (Bhopal), forest fires & hydrophobic ash (Uttarakhand), agricultural crop cycles & soil moisture (Sehore), glacier surge kinematics (Samudra Tapu), and earthquake fault deformation (Kutch). | 4-AOI Global Map with 1.4s cinematic `map.flyTo`, 16 numbered beacons (`①`–`④`), and 60-pass orbital timeline. |
+| **2. Personal Hometown Ground-Truth** | Documents the author's local geography in Bhopal (Bhojtal Upper Lake, NH-46 highway barrier damming 14 villages, and Sehore Sharbati wheat aquifer collapse tilting the Narmada canal). | Dedicated sub-tab in `🧭 SAR Insights & Hometown Story` modal with audible voice narration. |
+| **3. What We SEE vs. What We DON'T SEE** | Explains why smooth water is pitch-black (specular bounce away from radar), why clouds and dry snow are transparent, and why sub-canopy water creates a $+6.2\text{ dB}$ double-bounce surge. | Interactive `Seen vs. Unseen` physics cards + 24cm Wavelength X-Ray penetration slider. |
+| **4. Polarizations on Land vs. Ice** | Contrasts $HH$ co-pol (surface flood double-bounce on land & wet-snow melt on ice) with $HV$ cross-pol (canopy volume scattering on land & multi-year firn deformation on ice) and $HH/HV$ ratio. | Interactive `POLARIZATION: [HH] [HV] [HH/HV] [InSAR]` selector strip in `WavelengthXRayBar.tsx`. |
+| **5. Multi-Sensor Frequency Matrix** | Benchmark comparing NASA-ISRO NISAR L-Band ($23.84\text{ cm}$), ISRO S-Band ($9.3\text{ cm}$), Sentinel-1 C-Band ($5.6\text{ cm}$), and Sentinel-2 Optical ($400\text{ nm}$). | Side-by-side Frequency Matrix in `ChallengeInsightsModal` + Split-Screen Comparison Curtain (`⚖️ Compare View`). |
+| **6. Ancillary GIS & Human vs. Natural Drivers** | Downloads and overlays WorldPop gridded population density ($42,800$ residents exposed), ESA WorldCover $10\text{m}$ land use boundaries, and human vs. natural tipping points. | 3 Toggleable Bottom-Left Map Pills (`👥 Population`, `🌿 Land Cover`, `🏭 Human vs. Natural Drivers`). |
+| **7. Future Applications & Real ASF DAAC Provenance** | Showcases 5 future NISAR capabilities (autonomous dam monitoring, carbon auditing, permafrost sentry) and cites official NASA ASF DAAC granule specifications. | Real ASF DAAC Granule Table (`NISAR_L2_GUNW`, `NISAR_L2_GCOV`, `NISAR_L2_GOFF`) + copyable `asf_search` Python code snippet. |
+

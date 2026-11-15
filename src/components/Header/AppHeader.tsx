@@ -12,7 +12,8 @@ import {
   Bot,
   Lock,
   Unlock,
-  LogOut
+  LogOut,
+  Compass
 } from 'lucide-react';
 import { AOIScenario, AOIId, UserViewMode } from '../../types';
 
@@ -31,6 +32,7 @@ interface AppHeaderProps {
   onLogoutScientist?: () => void;
   onOpenGroqChatbot?: () => void;
   onReturnHome?: () => void;
+  onOpenChallengeInsights?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -48,6 +50,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onLogoutScientist,
   onOpenGroqChatbot,
   onReturnHome,
+  onOpenChallengeInsights,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -153,8 +156,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         )}
       </div>
 
-      {/* RIGHT: Master Tour + AI Copilot + Action Brief + Fullscreen */}
+      {/* RIGHT: Master Tour + Insights + AI Copilot + Action Brief + Fullscreen */}
       <div className="flex items-center gap-2 flex-shrink-0">
+        {/* 🧭 NASA Challenge Insights & Hometown Story Button */}
+        {onOpenChallengeInsights && (
+          <button
+            onClick={onOpenChallengeInsights}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-electric/25 via-emerald-500/20 to-cyan-electric/25 border border-cyan-electric/50 text-xs font-mono font-bold text-white hover:border-cyan-electric transition-all shadow-glow-cyan whitespace-nowrap"
+            title="Open NASA Challenge Scientific Hypotheses & Hometown Story Hub"
+          >
+            <Compass className="w-3.5 h-3.5 text-cyan-electric" />
+            <span>🧭 SAR Insights & Hometown Story</span>
+          </button>
+        )}
+
         {/* Unified 60-Second Interactive Master Tour Button */}
         {onToggleTour && (
           <button
