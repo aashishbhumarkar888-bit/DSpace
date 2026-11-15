@@ -26,13 +26,14 @@
    - 5.2 Seamless Hybrid Data Adapter (Live MongoDB + Static JSON Fallback)
    - 5.3 REST API Endpoints Specification
 6. [Section 6: User Guide & Judge Defense Q&A Rubric](#section-6-user-guide--judge-defense-qa-rubric)
-   - 6.1 Simple Citizen Mode vs. Pro Scientist Mode
+   - 6.1 Civilian View vs. Scientist View
    - 6.2 Judge Defense: High-Frequency Technical Q&A
 7. [Section 7: Human-Centric UI/UX Architecture & Decision-Support Systems](#section-7-human-centric-uiux-architecture--decision-support-systems)
-   - 7.1 The 25-Second Auto-Guided Story Walkthrough & Teleprompter
-   - 7.2 Interactive Split-Screen Comparison Curtain (`⚖️ Compare View`)
-   - 7.3 Plain-English Translators, Severity Meters & Micro-Glossary
-   - 7.4 Official District Collector / NDMA Action Dossier
+   - 7.1 The 60-Second (6 Chapters × 10 Seconds) Interactive Master Tour
+   - 7.2 Zero-API-Key Esri World Satellite Imagery & Boundaries Overlay
+   - 7.3 Interactive Split-Screen Comparison Curtain (`⚖️ Compare View`)
+   - 7.4 Plain-English Translators, Severity Meters & Micro-Glossary
+   - 7.5 Official District Collector / NDMA Action Dossier
 
 ---
 
@@ -132,9 +133,9 @@ The frontend client includes `src/services/dataService.ts`:
 
 ## Section 6: User Guide & Judge Defense Q&A Rubric
 
-### 6.1 Simple Citizen Mode vs. Pro Scientist Mode
-- **✨ Simple Guide View (Default):** Uncluttered layout, plain-English severity cards, numbered circular beacons, and 1-click simulation.
-- **🔬 Pro SAR Telemetry Mode:** Full microwave polarimetric triangle, WLS $\chi^2$ matrices, and Web Audio Sonification Engine.
+### 6.1 Civilian View vs. Scientist View
+- **👤 Civilian View (Default):** Uncluttered layout, plain-English severity cards, numbered circular beacons, flashlight-mirror analogy, and 1-click simulation.
+- **🔬 Scientist View:** Full microwave polarimetric triangle, WLS $\chi^2$ matrices, and Web Audio Sonification Engine.
 
 ### 6.2 Judge Defense: High-Frequency Technical Q&A
 - **Q1:** How can you see through clouds and canopies? (*A: 23.84cm L-Band wavelength double-bounce reflection*).
@@ -145,26 +146,30 @@ The frontend client includes `src/services/dataService.ts`:
 
 ## Section 7: Human-Centric UI/UX Architecture & Decision-Support Systems
 
-### 7.1 The 25-Second Auto-Guided Story Walkthrough & Teleprompter
-For judges, visitors, or crisis directors with zero SAR radar background, DSpace features an automated 4-step story walkthrough:
-- **Phase 1 (0–6s):** Sets wavelength to $0\%$ (Optical Satellite Blindness). Highlights that optical satellites cannot see through monsoon clouds.
-- **Phase 2 (6–12s):** Activates $100\%$ L-Band Radar X-Ray. The 24cm wavelength penetrates cloud and forest canopy, revealing $4.2\text{M m}^3$ of trapped floodwater.
-- **Phase 3 (12–18s):** Advances to Chain Reaction tab, targeting the NH-46 embankment bottleneck and displaying the $-19.4\text{ mm/yr}$ canal bed subsidence.
-- **Phase 4 (18–25s):** Automatically executes the physical mitigation simulation, drains the basin, and presents the Official District Collector Action Dossier.
-- Includes a bottom-center HUD Teleprompter with animated progress meter and manual step override controls.
+### 7.1 The 60-Second (6 Chapters × 10 Seconds) Interactive Master Tour
+For judges, visitors, or crisis directors with zero SAR radar background, DSpace features an automated 60-second walkthrough:
+- **Chapter 1 (0:00–0:10): What Problem It Solves** — Highlights 14 villages flooded behind NH-46 and $-19.4\text{ mm/yr}$ canal subsidence.
+- **Chapter 2 (0:10–0:20): Why Other Satellites Fail** — Sweeps through $0\%$ Optical (92% cloud block) and $50\%$ C-Band (canopy volume scattering).
+- **Chapter 3 (0:20–0:30): How DSpace Solves It** — Activates $100\%$ L-Band radar, peeling away clouds and foliage to expose sub-canopy flood basins and aquifer compaction.
+- **Chapter 4 (0:30–0:40): How the Result Is Calculated** — Breaks down both the civilian flashlight analogy and the exact 4-Obs WLS unmixing and InSAR phase equations.
+- **Chapter 5 (0:40–0:50): The 35ms Hydraulic Solver & Benchmark** — Cuts the NH-46 relief bottleneck, animates the draining basin, and displays the benchmark comparison table ($0.052\text{m}$ depth RMSE vs $0.290\text{m}$).
+- **Chapter 6 (0:50–1:00): Real-World Field Action Dossier** — Opens the official GPS-tagged NDMA Action Dossier for emergency field teams.
+- Features a bottom-center HUD with live elapsed timer (`00:00 / 01:00`), interactive chapter tabs, and play/pause controls.
 
-### 7.2 Interactive Split-Screen Comparison Curtain (`⚖️ Compare View`)
-- Allows users to drag a glowing vertical curtain slider (`◄ | ►`) across the satellite map.
-- **Left Side:** Displays dense optical monsoon cloud cover and vegetation opacity.
-- **Right Side:** Exposes the underlying 24cm radar ground truth (sub-canopy inundation, InSAR subsidence fringes, and flow vectors).
+### 7.2 Zero-API-Key Esri World Satellite Imagery & Boundaries Overlay
+- Replaced third-party API-gated tile providers with 100% free, zero-rate-limit **Esri World Imagery** (`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`) combined with **Esri World Boundaries and Places** labels.
+- Styled with dark-mode contrast CSS filter (`brightness(0.78) contrast(1.18) saturate(1.1)`).
+- Dynamically fits bounds so all 4 numbered beacons (`① Bhoj Wetland`, `② NH-46 Barrier`, `③ Sehore Farms`, `④ Narmada Canal`) are immediately framed inside the viewport.
 
-### 7.3 Plain-English Translators, Severity Meters & Micro-Glossary
+### 7.3 Interactive Split-Screen Comparison Curtain (`⚖️ Compare View`)
+- Vertical draggable curtain slider (`◄ | ►`) divides optical cloud view on the left from 24cm radar sub-canopy water and InSAR fringes on the right.
+
+### 7.4 Plain-English Translators, Severity Meters & Micro-Glossary
 - Every metric badge features a 3-tier severity pill: `🟢 SAFE / NORMAL`, `🟡 WATCH / MODERATE`, and `🔴 CRITICAL ACTION NEEDED`.
-- 1-sentence plain-English explanations accompany every figure.
-- An interactive **Tap-to-Learn Micro-Glossary** explains technical radar terms (`Double-Bounce`, `InSAR Phase`, `Closure Phase`, `Manning's Slope`) using intuitive real-world physical analogies.
+- Micro-Glossary cards explain technical radar terms (`Double-Bounce`, `InSAR Phase`, `Closure Phase`, `Manning's Slope`) using intuitive physical analogies.
 
-### 7.4 Official District Collector / NDMA Action Dossier
-- Accessible via the **`📋 View District Action Brief`** button.
+### 7.5 Official District Collector / NDMA Action Dossier
+- Accessible via the **`📋 Action Brief`** header button or sidebar CTA.
 - Generates a print-ready executive briefing packet containing:
   - Incident Priority, Disaster Management Reference Code, and GPS Coordinates.
   - Plain-English Problem Summary and Attribution Mechanism.

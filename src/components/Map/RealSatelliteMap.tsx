@@ -48,12 +48,12 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
   const markersRef = useRef<L.Marker[]>([]);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 300, y: 250 });
 
-  // UPGRADE 2.1: Split-Screen Comparison Curtain State
+  // UPGRADE: Split-Screen Comparison Curtain State
   const [isCompareView, setIsCompareView] = useState<boolean>(false);
   const [curtainXPercent, setCurtainXPercent] = useState<number>(50); // 0 to 100%
   const isDraggingCurtain = useRef<boolean>(false);
 
-  // UPGRADE 2.2: Interactive Map Layer Filters
+  // UPGRADE: Interactive Map Layer Filters
   const [layerFilters, setLayerFilters] = useState<{
     floodwater: boolean;
     subsidence: boolean;
@@ -80,7 +80,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     stagnant: boolean;
   }>>([]);
 
-  // Initialize particles around AOI center
+  // Initialize particles along hydrological gradient between hotspots
   useEffect(() => {
     const pts = [];
     const count = 1800;
@@ -89,10 +89,10 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
     for (let i = 0; i < count; i++) {
       pts.push({
-        lat: centerLat + (Math.random() - 0.5) * 0.16,
-        lng: centerLng + (Math.random() - 0.5) * 0.22,
-        vLat: (Math.random() - 0.5) * 0.0004,
-        vLng: (Math.random() - 0.5) * 0.0004,
+        lat: centerLat + (Math.random() - 0.5) * 0.18,
+        lng: centerLng + (Math.random() - 0.5) * 0.24,
+        vLat: -0.00015 - Math.random() * 0.0003, // Southward drainage bias
+        vLng: 0.0001 + (Math.random() - 0.5) * 0.0002,
         life: Math.random() * 80,
         maxLife: 70 + Math.random() * 70,
         stagnant: false,
@@ -101,27 +101,46 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     particlesRef.current = pts;
   }, [currentAOI.aoiId]);
 
-  // Initialize Leaflet Map
+  // Fit bounds to guarantee ALL 4 hotspots are immediately visible
+  const fitHotspotBounds = useCallback((mapInstance: L.Map) => {
+    if (!currentAOI.hotspots || currentAOI.hotspots.length === 0) return;
+    const latLngs = currentAOI.hotspots.map((h) => L.latLng(h.lat, h.lng));
+    latLngs.push(L.latLng(currentAOI.coordinates.lat, currentAOI.coordinates.lng));
+    const bounds = L.latLngBounds(latLngs);
+    mapInstance.fitBounds(bounds, {
+      padding: [45, 45],
+      maxZoom: 12,
+    });
+  }, [currentAOI]);
+
+  // Initialize Leaflet Map with 100% Free, Zero-API-Key Esri World Imagery + Labels
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = L.map(mapContainerRef.current, {
       center: [currentAOI.coordinates.lat, currentAOI.coordinates.lng],
-      zoom: currentAOI.coordinates.zoom || 12,
+      zoom: currentAOI.coordinates.zoom || 11,
       zoomControl: false,
       attributionControl: false,
     });
 
-    // Dark-mode satellite & cartographic basemap tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    // 1. Base Satellite Imagery Layer (100% Free Esri World Imagery - NO API KEY REQUIRED)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
-      className: 'dark-satellite-filter',
+      className: 'esri-satellite-tiles',
+    }).addTo(map);
+
+    // 2. Hybrid Place Names & Administrative Boundaries Overlay
+    L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 19,
+      className: 'esri-labels-tiles',
     }).addTo(map);
 
     // Zoom controls at bottom-right
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     mapRef.current = map;
+    fitHotspotBounds(map);
 
     return () => {
       map.remove();
@@ -132,14 +151,10 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
   // Update map view when AOI changes
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.flyTo(
-      [currentAOI.coordinates.lat, currentAOI.coordinates.lng],
-      currentAOI.coordinates.zoom || 12,
-      { duration: 1.2 }
-    );
-  }, [currentAOI.aoiId]);
+    fitHotspotBounds(mapRef.current);
+  }, [currentAOI.aoiId, fitHotspotBounds]);
 
-  // Update Numbered Beacons (①, ②, ③, ④) on map with layer filter support
+  // Update Numbered Beacons (①, ②, ③, ④) on map
   useEffect(() => {
     if (!mapRef.current) return;
     const map = mapRef.current;
@@ -149,7 +164,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     markersRef.current = [];
 
     currentAOI.hotspots.forEach((hs) => {
-      // Check layer filter
+      // Check layer filters
       if (hs.number === 1 && !layerFilters.floodwater) return;
       if (hs.number === 2 && !layerFilters.bottleneck) return;
       if (hs.number === 3 && !layerFilters.subsidence) return;
@@ -161,28 +176,28 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
       const iconHtml = `
         <div class="relative group cursor-pointer -translate-x-1/2 -translate-y-1/2">
           <!-- Pulse ring -->
-          <div class="absolute inset-0 rounded-full ${
-            isCritical ? 'bg-rose-500/40 animate-ping' : 'bg-cyan-400/30 animate-pulse'
+          <div class="absolute -inset-1.5 rounded-full ${
+            isCritical ? 'bg-rose-500/50 animate-ping' : 'bg-cyan-400/40 animate-pulse'
           }"></div>
           
           <!-- Numbered circle beacon -->
           <div class="relative w-8 h-8 rounded-full flex items-center justify-center font-mono font-black text-xs shadow-2xl transition-all duration-200 border-2 ${
             isSelected
-              ? 'bg-cyan-electric text-slate-950 border-white scale-125 shadow-glow-cyan'
+              ? 'bg-cyan-electric text-slate-950 border-white scale-125 shadow-glow-cyan ring-2 ring-cyan-electric'
               : isCritical
               ? 'bg-rose-600 text-white border-rose-300 animate-bounce'
-              : 'bg-slate-900/90 text-cyan-electric border-cyan-400 hover:scale-110'
+              : 'bg-slate-950/90 text-cyan-electric border-cyan-400 hover:scale-115'
           }">
             ${hs.number === 1 ? '①' : hs.number === 2 ? '②' : hs.number === 3 ? '③' : '④'}
           </div>
 
           <!-- Short 2-word pill label underneath -->
-          <div class="absolute top-9 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border backdrop-blur-md shadow-lg ${
+          <div class="absolute top-9 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border backdrop-blur-md shadow-xl ${
             isSelected
-              ? 'bg-cyan-electric/90 text-slate-950 border-white'
+              ? 'bg-cyan-electric text-slate-950 border-white shadow-glow-cyan'
               : isCritical
-              ? 'bg-rose-950/80 text-rose-200 border-rose-500'
-              : 'bg-slate-950/80 text-slate-200 border-cyan-500/40'
+              ? 'bg-rose-950/90 text-rose-200 border-rose-500'
+              : 'bg-slate-950/90 text-slate-100 border-cyan-500/50'
           }">
             ${hs.shortName}
           </div>
@@ -238,7 +253,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
     isDraggingCurtain.current = false;
   };
 
-  // 60-FPS Overlay Canvas Renderer: Clouds, Sub-Canopy Floods, InSAR Fringes, Flow Particles, Loupe & Split Curtain
+  // 60-FPS Overlay Canvas Renderer: Sub-canopy flood polygons, InSAR fringes, NH-46 barrier, flow particles, loupe & split curtain
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !mapRef.current) return;
@@ -274,65 +289,101 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
       const lBandOpacity = isCompareView ? 1.0 : (wavelengthPct / 100);
 
-      // 1. Draw Sub-Canopy Radar Inundation Polygons
+      // 1. Draw Glowing Sub-Canopy Inundation Basin around Beacon ① (Bhoj Wetland)
       if (layerFilters.floodwater && (lBandOpacity > 0.1 || isLoupeActive || isCompareView)) {
-        const centerPt = map.latLngToContainerPoint([
-          currentAOI.coordinates.lat,
-          currentAOI.coordinates.lng,
-        ]);
-
-        // Sub-canopy flood basin
-        ctx.beginPath();
-        const lakeR = 90;
-        ctx.arc(centerPt.x - 40, centerPt.y - 30, lakeR, 0, Math.PI * 2);
-        ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.16)' : 'rgba(0, 240, 255, 0.24)';
-        ctx.fill();
-        ctx.strokeStyle = isMitigationActive ? '#00E676' : '#00F0FF';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        // Stagnant Embankment Trap Polygon
-        if (layerFilters.bottleneck) {
-          const trapPt = map.latLngToContainerPoint([
-            currentAOI.hotspots[1]?.lat || currentAOI.coordinates.lat,
-            currentAOI.hotspots[1]?.lng || currentAOI.coordinates.lng,
-          ]);
+        const hs1 = currentAOI.hotspots[0];
+        if (hs1) {
+          const pt1 = map.latLngToContainerPoint([hs1.lat, hs1.lng]);
           ctx.beginPath();
-          ctx.arc(trapPt.x, trapPt.y, 65, 0, Math.PI * 2);
-          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.18)' : 'rgba(255, 30, 86, 0.3)';
+          ctx.ellipse(pt1.x, pt1.y, 85, 55, Math.PI / 8, 0, Math.PI * 2);
+          ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.20)' : 'rgba(0, 240, 255, 0.28)';
           ctx.fill();
-          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#00F0FF';
           ctx.lineWidth = 2;
           ctx.stroke();
+
+          // Sub-canopy label
+          ctx.font = 'bold 9px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#00F0FF';
+          ctx.fillText('SUB-CANOPY FLOOD POOL (+6.2 dB HH)', pt1.x - 70, pt1.y - 45);
         }
 
-        // 2. Neon InSAR Subsidence / Creep Rings (MICRO Scale or active filter)
-        if (layerFilters.subsidence && (scaleLevel === 'MICRO' || isCompareView)) {
-          const subPt = map.latLngToContainerPoint([
-            currentAOI.hotspots[2]?.lat || currentAOI.coordinates.lat,
-            currentAOI.hotspots[2]?.lng || currentAOI.coordinates.lng,
-          ]);
-          const rings = 4;
-          for (let i = 1; i <= rings; i++) {
-            const r = (i * 22 + (frame * 0.4)) % 90;
+        // 2. NH-46 Embankment Road Line & Bottleneck Silt Trap around Beacon ②
+        if (layerFilters.bottleneck) {
+          const hs2 = currentAOI.hotspots[1];
+          if (hs2) {
+            const pt2 = map.latLngToContainerPoint([hs2.lat, hs2.lng]);
+
+            // Draw NH-46 Embankment Line
             ctx.beginPath();
-            ctx.arc(subPt.x, subPt.y, r, 0, Math.PI * 2);
-            ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.4)' : 'rgba(255, 42, 133, 0.7)';
-            ctx.lineWidth = 1.6;
-            ctx.setLineDash([6, 4]);
+            ctx.moveTo(pt2.x - 80, pt2.y - 90);
+            ctx.lineTo(pt2.x + 60, pt2.y + 100);
+            ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.6)' : 'rgba(255, 30, 86, 0.85)';
+            ctx.lineWidth = 3.5;
             ctx.stroke();
-            ctx.setLineDash([]);
+
+            // Embankment label
+            ctx.font = 'bold 8.5px "JetBrains Mono"';
+            ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+            ctx.fillText('NH-46 HIGHWAY EMBANKMENT BARRIER', pt2.x + 10, pt2.y - 25);
+
+            // Stagnant silted backwater polygon
+            ctx.beginPath();
+            ctx.arc(pt2.x - 20, pt2.y + 10, 55, 0, Math.PI * 2);
+            ctx.fillStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.18)' : 'rgba(255, 30, 86, 0.32)';
+            ctx.fill();
+            ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FF1E56';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
           }
+        }
+
+        // 3. Neon Magenta InSAR Subsidence Fringes around Beacon ③ (Sehore Farms)
+        if (layerFilters.subsidence) {
+          const hs3 = currentAOI.hotspots[2];
+          if (hs3) {
+            const pt3 = map.latLngToContainerPoint([hs3.lat, hs3.lng]);
+            const rings = 4;
+            for (let i = 1; i <= rings; i++) {
+              const r = (i * 20 + (frame * 0.35)) % 75;
+              ctx.beginPath();
+              ctx.ellipse(pt3.x, pt3.y, r * 1.2, r * 0.8, -Math.PI / 6, 0, Math.PI * 2);
+              ctx.strokeStyle = isMitigationActive ? 'rgba(0, 230, 118, 0.45)' : 'rgba(255, 42, 133, 0.8)';
+              ctx.lineWidth = 1.8;
+              ctx.setLineDash([6, 3]);
+              ctx.stroke();
+              ctx.setLineDash([]);
+            }
+
+            // InSAR label
+            ctx.font = 'bold 8.5px "JetBrains Mono"';
+            ctx.fillStyle = isMitigationActive ? '#00E676' : '#FF2A85';
+            ctx.fillText('InSAR COMPACTION (-19.4 mm/yr)', pt3.x - 65, pt3.y - 45);
+          }
+        }
+
+        // 4. Narmada Canal Corridor around Beacon ④
+        const hs4 = currentAOI.hotspots[3];
+        if (hs4) {
+          const pt4 = map.latLngToContainerPoint([hs4.lat, hs4.lng]);
+          ctx.beginPath();
+          ctx.moveTo(pt4.x - 90, pt4.y + 40);
+          ctx.quadraticCurveTo(pt4.x, pt4.y, pt4.x + 90, pt4.y - 30);
+          ctx.strokeStyle = isMitigationActive ? '#00E676' : '#FFB800';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          ctx.font = 'bold 8.5px "JetBrains Mono"';
+          ctx.fillStyle = isMitigationActive ? '#00E676' : '#FFB800';
+          ctx.fillText('NARMADA CANAL AQUEDUCT CORRIDOR', pt4.x - 70, pt4.y + 35);
         }
       }
 
-      // 3. Render Hydraulic Flow Particles
-      if ((scaleLevel === 'MESO' || scaleLevel === 'MACRO' || isCompareView) && (lBandOpacity > 0.2 || isCompareView)) {
+      // 5. Render Hydraulic Flow Particles
+      if (lBandOpacity > 0.2 || isCompareView) {
         const pts = particlesRef.current;
-        const centerPt = map.latLngToContainerPoint([
-          currentAOI.coordinates.lat,
-          currentAOI.coordinates.lng,
-        ]);
+        const hs2 = currentAOI.hotspots[1];
+        const centerPt = hs2 ? map.latLngToContainerPoint([hs2.lat, hs2.lng]) : { x: width / 2, y: height / 2 };
 
         for (let i = 0; i < pts.length; i++) {
           const p = pts[i];
@@ -341,26 +392,26 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
           p.life++;
 
           if (p.life > p.maxLife) {
-            p.lat = currentAOI.coordinates.lat + (Math.random() - 0.5) * 0.14;
-            p.lng = currentAOI.coordinates.lng + (Math.random() - 0.5) * 0.18;
+            p.lat = currentAOI.coordinates.lat + (Math.random() - 0.5) * 0.16;
+            p.lng = currentAOI.coordinates.lng + (Math.random() - 0.5) * 0.22;
             p.life = 0;
           }
 
           const pt = map.latLngToContainerPoint([p.lat, p.lng]);
 
-          // Stagnation check
+          // Stagnation check near bottleneck
           const distToBottleneck = Math.hypot(pt.x - centerPt.x, pt.y - centerPt.y);
-          const isStagnant = distToBottleneck < 60 && !isMitigationActive;
+          const isStagnant = distToBottleneck < 55 && !isMitigationActive;
 
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, isStagnant ? 2.4 : 1.4, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, isStagnant ? 2.5 : 1.5, 0, Math.PI * 2);
 
           if (isStagnant) {
             ctx.fillStyle = '#FF1E56';
           } else if (isMitigationActive) {
-            ctx.fillStyle = 'rgba(0, 230, 118, 0.8)';
+            ctx.fillStyle = 'rgba(0, 230, 118, 0.85)';
           } else {
-            ctx.fillStyle = 'rgba(0, 240, 255, 0.75)';
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.8)';
           }
           ctx.fill();
         }
@@ -423,7 +474,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
         ctx.strokeStyle = '#00F0FF';
         ctx.lineWidth = 2.5;
         ctx.shadowColor = '#00F0FF';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 12;
         ctx.stroke();
 
         // Circular Draggable Handle in the middle
@@ -471,9 +522,9 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
 
         // Badge
         ctx.fillStyle = 'rgba(3, 7, 14, 0.9)';
-        ctx.fillRect(mousePos.x + 16, mousePos.y + 16, 134, 24);
+        ctx.fillRect(mousePos.x + 16, mousePos.y + 16, 144, 24);
         ctx.strokeStyle = 'rgba(0, 240, 255, 0.5)';
-        ctx.strokeRect(mousePos.x + 16, mousePos.y + 16, 134, 24);
+        ctx.strokeRect(mousePos.x + 16, mousePos.y + 16, 144, 24);
         ctx.font = '10px "JetBrains Mono"';
         ctx.fillStyle = '#00F0FF';
         ctx.fillText('24cm RADAR X-RAY', mousePos.x + 22, mousePos.y + 32);
@@ -540,7 +591,7 @@ export const RealSatelliteMap: React.FC<RealSatelliteMapProps> = ({
         />
       )}
 
-      {/* Top Map Action Bar: Compare View Toggle + Cloud Alert */}
+      {/* Top Map Action Bar: Compare View Toggle */}
       <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
         <button
           onClick={() => setIsCompareView((prev) => !prev)}
