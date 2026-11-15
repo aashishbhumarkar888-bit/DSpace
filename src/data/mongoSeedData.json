@@ -1,0 +1,440 @@
+{
+  "aois": [
+    {
+      "aoiId": "aoi-1",
+      "name": "Bhopal Bhoj Wetland & Narmada Agro-Valley",
+      "tagline": "Coupled Hydro-Agricultural Subsidence & Canal Gradient Inversion",
+      "region": "Madhya Pradesh, Central India",
+      "coordinates": {
+        "lat": 23.2450,
+        "lng": 77.3500,
+        "zoom": 12,
+        "elevation": 498.2
+      },
+      "granuleId": "DSPACE_L2_GUNW_BHOJPAL_ORB042_TRACK114_20260814",
+      "orbitPass": "Pass #34 (Ascending L-Band 23.84cm + S-Band 9.3cm)",
+      "hazardType": "Sub-Canopy Flood Trap & Aquifer Compaction",
+      "plainEnglishSummary": {
+        "crisis": "Heavy monsoon rainfall is trapped beneath dense tree and crop canopies behind the NH-46 road embankment, while intense tubewell pumping for wheat crops has collapsed the underground aquifer by -19.4 mm/yr, tilting the irrigation canal backward.",
+        "whyMissed": "Normal optical satellites saw only a 92% white blanket of monsoon storm clouds, missing the pooled floodwater and underground soil sinking entirely.",
+        "howFound": "DSpace's NASA-ISRO 24cm L-Band radar waves pierced through the clouds and tree canopy, catching water bouncing off tree trunks (+6.2 dB HH) and measuring millimeter ground subsidence with radar interferometry.",
+        "impactBefore": "14 villages flooded • 4,200 hectares of cropland ruined • ₹48 Cr potential loss",
+        "impactAfter": "14 villages drained • 4,200 hectares saved • ₹48 Cr economic loss prevented",
+        "villagesSaved": 14,
+        "hectaresRecovered": 4200,
+        "economicValueProtected": "₹48 Cr"
+      },
+      "hotspots": [
+        {
+          "id": "h1-1",
+          "number": 1,
+          "name": "Upper Lake Shoreline",
+          "shortName": "Bhoj Wetland",
+          "subtitle": "Sub-Canopy Flood Inundation (+6.2 dB HH)",
+          "lat": 23.2620,
+          "lng": 77.3100,
+          "type": "flood",
+          "scale": "MESO",
+          "telemetryDelta": "+6.2 dB Double-Bounce",
+          "actionPrompt": "Expose Sub-Canopy Water",
+          "description": "24cm radar penetrates dense wetland trees, detecting water-trunk corner reflections hidden from optical sensors.",
+          "metricValue": "+6.2 dB HH"
+        },
+        {
+          "id": "h1-2",
+          "number": 2,
+          "name": "NH-46 Embankment Bottleneck",
+          "shortName": "NH-46 Barrier",
+          "subtitle": "14 Villages Hydraulically Trapped (dh/dt ≈ 0)",
+          "lat": 23.2100,
+          "lng": 77.4450,
+          "type": "critical",
+          "scale": "MESO",
+          "telemetryDelta": "Velocity: 0.04 m/s (Stagnant)",
+          "actionPrompt": "Cut Relief Culvert",
+          "description": "Highway earthwork acts as an unintended dam, creating stagnant silted floodwater pooling upstream.",
+          "metricValue": "0.04 m/s Flow"
+        },
+        {
+          "id": "h1-3",
+          "number": 3,
+          "name": "Sehore Rabi Wheat Belt",
+          "shortName": "Sehore Farms",
+          "subtitle": "Tubewell Over-Extraction (-19.4 mm/yr)",
+          "lat": 23.1850,
+          "lng": 77.0850,
+          "type": "subsidence",
+          "scale": "MICRO",
+          "telemetryDelta": "-19.4 mm Aquifer Compaction",
+          "actionPrompt": "Analyze Piezometer Strain",
+          "description": "Intense deep-well irrigation dewaters semi-confined alluvial layers, triggering irreversible skeletal ground compaction.",
+          "metricValue": "-19.4 mm/yr"
+        },
+        {
+          "id": "h1-4",
+          "number": 4,
+          "name": "Narmada Main Canal Ch.42",
+          "shortName": "Narmada Canal",
+          "subtitle": "Bed Slope Dropped 28% (Manning's Q Alert)",
+          "lat": 22.8400,
+          "lng": 77.5800,
+          "type": "infrastructure",
+          "scale": "MESO",
+          "telemetryDelta": "Bed Slope: -28% (0.018%)",
+          "actionPrompt": "Simulate Siphon Gradient",
+          "description": "Differential ground subsidence flattened canal bed slope below minimum scouring velocity, causing silting backflow.",
+          "metricValue": "-28% Bed Slope"
+        }
+      ],
+      "baselineMetrics": {
+        "roughnessHV_dB": -14.2,
+        "dielectricHH_dB": -6.4,
+        "phaseMotion_mm": -19.4,
+        "flowVelocityMs": 0.04,
+        "closurePhaseRad": 0.042,
+        "wlsResidualChi2": 0.038,
+        "unmixedDihedral_s_dB": 8.6
+      },
+      "mitigatedMetrics": {
+        "roughnessHV_dB": -19.4,
+        "dielectricHH_dB": -11.8,
+        "phaseMotion_mm": -2.8,
+        "flowVelocityMs": 0.78,
+        "closurePhaseRad": 0.012,
+        "confidenceScore": 94.8
+      },
+      "mitigationPlan": {
+        "actionTitle": "Cut NH-46 Siphon Culvert & Re-Level Canal Bed",
+        "actionDescription": "Deploy pressurized 1,200mm siphon culverts beneath highway embankment and re-grade canal bed to 0.026% slope.",
+        "predictedRecoveryDays": 14
+      }
+    },
+    {
+      "aoiId": "aoi-2",
+      "name": "Himalayan Wildfire-to-Landslide Slope Cascade",
+      "tagline": "Crown Ash Hydrophobicity & Monsoon Debris Runout",
+      "region": "Chamoli / Alaknanda Valley, Uttarakhand",
+      "coordinates": {
+        "lat": 30.4121,
+        "lng": 79.3241,
+        "zoom": 12,
+        "elevation": 2140.0
+      },
+      "granuleId": "DSPACE_L2_GCOV_CHAMOLI_ORB108_TRACK049_20260522",
+      "orbitPass": "Pass #52 (Descending L+S Dual-Band)",
+      "hazardType": "Pre-Landslide Shear Creep & Highway Severance",
+      "plainEnglishSummary": {
+        "crisis": "Intense pre-monsoon forest fires baked a water-repellent ash glaze across steep mountain slopes. Heavy monsoon rains cannot soak into the soil, saturating the bedrock shear plane and accelerating slope creep to 4.8 mm/day above the pilgrim highway.",
+        "whyMissed": "Optical satellites only see black burnt trees, unable to measure sub-surface moisture or millimeter-scale slope sliding.",
+        "howFound": "DSpace's dielectric microwave sounding measured extreme moisture trapped at the bedrock interface (ε = 41), while InSAR phase fringes revealed accelerating creep before catastrophic collapse.",
+        "impactBefore": "Badrinath highway severance imminent • Factor of safety: 1.04 • 28,000 pilgrims trapped",
+        "impactAfter": "Slope stabilized • Factor of safety raised to 1.62 • 28,000 pilgrims protected",
+        "villagesSaved": 9,
+        "hectaresRecovered": 3100,
+        "economicValueProtected": "₹72 Cr"
+      },
+      "hotspots": [
+        {
+          "id": "h2-1",
+          "number": 1,
+          "name": "Alaknanda Gorge Flank",
+          "shortName": "Alaknanda Gorge",
+          "subtitle": "Phyllite Joint Creep (4.8 mm/day)",
+          "lat": 30.4350,
+          "lng": 79.3000,
+          "type": "critical",
+          "scale": "MICRO",
+          "telemetryDelta": "Creep Velocity: 4.8 mm/day",
+          "actionPrompt": "Inspect Mohr-Coulomb Yield",
+          "description": "Deep-seated bedding joints in weathered phyllite accelerating downhill toward the river gorge.",
+          "metricValue": "4.8 mm/day Creep"
+        },
+        {
+          "id": "h2-2",
+          "number": 2,
+          "name": "Chir Pine Wildfire Scar",
+          "shortName": "Pine Fire Scar",
+          "subtitle": "Loss of Canopy (HV -7.8 dB / Ash Glaze)",
+          "lat": 30.4500,
+          "lng": 79.3700,
+          "type": "infrastructure",
+          "scale": "MESO",
+          "telemetryDelta": "HV Cross-Pol: -7.8 dB",
+          "actionPrompt": "Analyze Hydrophobic Ash",
+          "description": "Burned root systems lose tensile anchor capacity while hydrophobic ash seals surface infiltration.",
+          "metricValue": "-7.8 dB HV"
+        },
+        {
+          "id": "h2-3",
+          "number": 3,
+          "name": "Badrinath Highway Cut NH-07",
+          "shortName": "NH-07 Cut",
+          "subtitle": "Slope Toe Shear Strain (FS = 1.04)",
+          "lat": 30.3800,
+          "lng": 79.2900,
+          "type": "subsidence",
+          "scale": "MICRO",
+          "telemetryDelta": "Factor of Safety: 1.04",
+          "actionPrompt": "Simulate Rock Bolting",
+          "description": "Excavation toe of pilgrimage highway under severe shear strain, threatening 1.8M m³ landslide runout.",
+          "metricValue": "FS 1.04 Critical"
+        },
+        {
+          "id": "h2-4",
+          "number": 4,
+          "name": "Rishiganga Hydro Barrage",
+          "shortName": "Hydro Barrage",
+          "subtitle": "Debris Runout Inundation Path (1.8M m³)",
+          "lat": 30.3400,
+          "lng": 79.3600,
+          "type": "flood",
+          "scale": "MACRO",
+          "telemetryDelta": "Debris Volume: 1.8M m³",
+          "actionPrompt": "Model Runout Hydrograph",
+          "description": "Downstream hydroelectric intake tunnel in direct path of potential debris fan.",
+          "metricValue": "1.8M m³ Volume"
+        }
+      ],
+      "baselineMetrics": {
+        "roughnessHV_dB": -22.4,
+        "dielectricHH_dB": -4.8,
+        "phaseMotion_mm": -48.2,
+        "flowVelocityMs": 4.2,
+        "closurePhaseRad": 0.068,
+        "wlsResidualChi2": 0.052,
+        "unmixedDihedral_s_dB": 2.1
+      },
+      "mitigatedMetrics": {
+        "roughnessHV_dB": -16.2,
+        "dielectricHH_dB": -9.5,
+        "phaseMotion_mm": -5.4,
+        "flowVelocityMs": 1.2,
+        "closurePhaseRad": 0.015,
+        "confidenceScore": 92.4
+      },
+      "mitigationPlan": {
+        "actionTitle": "Deploy Active Rock Anchors & Hydro-Seed Vetiver Terraces",
+        "actionDescription": "Drill pressurized pre-stressed rock-bolts into stable phyllite toe and install debris-dissipation check dams.",
+        "predictedRecoveryDays": 14
+      }
+    },
+    {
+      "aoiId": "aoi-3",
+      "name": "Coseismic Fault Slip & Gravity Canal Stress",
+      "tagline": "Kutch Mainland Fault Blind Thrust & Saline Water Upwelling",
+      "region": "Kutch Basin, Gujarat, Western India",
+      "coordinates": {
+        "lat": 23.3340,
+        "lng": 69.8712,
+        "zoom": 12,
+        "elevation": 72.0
+      },
+      "granuleId": "DSPACE_L2_GUNW_KUTCH_ORB015_TRACK072_20260119",
+      "orbitPass": "Pass #18 (Ascending L-Band Interferogram)",
+      "hazardType": "Coseismic Surface Rupture & Reverse Gradient Tilt",
+      "plainEnglishSummary": {
+        "crisis": "A magnitude 6.4 blind thrust earthquake along the Kutch fault lifted the northern canal block by 28.6 cm, snapping concrete liners and reversing the water flow backward into the main drinking water pump station.",
+        "whyMissed": "Optical cameras cannot see invisible sub-centimeter land warping across flat desert landscapes or underground saltwater upwelling.",
+        "howFound": "DSpace's L-Band interferogram mapped 2.4 concentric radar fringe circles (each circle = 11.9 cm offset) directly over the buried fault trace, isolating the cracked canal section in minutes.",
+        "impactBefore": "Canal liner sheared • 340 structures flooded • Drinking water cut to 64,000 residents",
+        "impactAfter": "Backflow wave arrested • Flexible siphon flume installed • Drinking water restored in 48h",
+        "villagesSaved": 22,
+        "hectaresRecovered": 9800,
+        "economicValueProtected": "₹120 Cr"
+      },
+      "hotspots": [
+        {
+          "id": "h3-1",
+          "number": 1,
+          "name": "Kutch Fault Blind Trace",
+          "shortName": "Fault Trace",
+          "subtitle": "Okada Elastic Dislocation (28.6 cm Offset)",
+          "lat": 23.3650,
+          "lng": 69.8200,
+          "type": "fault",
+          "scale": "MICRO",
+          "telemetryDelta": "2.4 Fringes (28.6 cm Slip)",
+          "actionPrompt": "Inspect Okada Slip Tensor",
+          "description": "Blind thrust hypocenter rupture at 14km depth warping surface topography upward.",
+          "metricValue": "28.6 cm Slip"
+        },
+        {
+          "id": "h3-2",
+          "number": 2,
+          "name": "Narmada Branch Canal Rupture",
+          "shortName": "Canal Rupture",
+          "subtitle": "8cm Concrete Monolithic Slab Shear",
+          "lat": 23.3100,
+          "lng": 69.9300,
+          "type": "critical",
+          "scale": "MICRO",
+          "telemetryDelta": "Tensile Strain: 1.8 × 10⁻⁴",
+          "actionPrompt": "Deploy Flex-Flume Siphon",
+          "description": "Tensile ground deformation opened 8cm diagonal fissures across unreinforced concrete canal bed.",
+          "metricValue": "8cm Slab Shear"
+        },
+        {
+          "id": "h3-3",
+          "number": 3,
+          "name": "Saline Groundwater Upwelling",
+          "shortName": "Saline Geyser",
+          "subtitle": "Coseismic Liquefaction (HH +11.4 dB)",
+          "lat": 23.2800,
+          "lng": 69.8100,
+          "type": "flood",
+          "scale": "MESO",
+          "telemetryDelta": "Conductivity σ: 4.8 S/m",
+          "actionPrompt": "Analyze Debye Dielectric",
+          "description": "Pressurized saline groundwater bursts through earthquake fissures into agricultural soils.",
+          "metricValue": "+11.4 dB HH"
+        },
+        {
+          "id": "h3-4",
+          "number": 4,
+          "name": "Pump Station #4 Header",
+          "shortName": "Pump Station",
+          "subtitle": "Reverse Hydraulic Gradient (-0.008%)",
+          "lat": 23.3900,
+          "lng": 69.9600,
+          "type": "infrastructure",
+          "scale": "MESO",
+          "telemetryDelta": "Backflow Velocity: -0.15 m/s",
+          "actionPrompt": "Trip SCADA Gates",
+          "description": "Northern tectonic block uplift forces 400 m³/s canal discharge backward into intake manifolds.",
+          "metricValue": "-0.15 m/s Backflow"
+        }
+      ],
+      "baselineMetrics": {
+        "roughnessHV_dB": -18.2,
+        "dielectricHH_dB": -3.8,
+        "phaseMotion_mm": -119.2,
+        "flowVelocityMs": -0.15,
+        "closurePhaseRad": 0.015,
+        "wlsResidualChi2": 0.029,
+        "unmixedDihedral_s_dB": 11.4
+      },
+      "mitigatedMetrics": {
+        "roughnessHV_dB": -19.8,
+        "dielectricHH_dB": -12.4,
+        "phaseMotion_mm": -12.0,
+        "flowVelocityMs": 0.85,
+        "closurePhaseRad": 0.008,
+        "confidenceScore": 97.4
+      },
+      "mitigationPlan": {
+        "actionTitle": "Trip SCADA Radial Gates & Erect Modular Flex-Flume Bypass",
+        "actionDescription": "Automatically close radial gates at Ch. 18+400, divert backflow to salt pan basin, and bridge cracked section with corrugated steel flume.",
+        "predictedRecoveryDays": 7
+      }
+    },
+    {
+      "aoiId": "aoi-4",
+      "name": "Samudra Tapu Glacier Melt & Surge (GLOF Risk)",
+      "tagline": "Basal Cryo-Lubrication & Moraine Dam Hydrostatic Breach",
+      "region": "Chandra-Bhaga Basin, Lahaul-Spiti, Himachal Pradesh",
+      "coordinates": {
+        "lat": 32.4930,
+        "lng": 77.3820,
+        "zoom": 12,
+        "elevation": 4320.0
+      },
+      "granuleId": "DSPACE_L2_GOFF_SAMUDRA_ORB131_TRACK003_20260708",
+      "orbitPass": "Pass #60 (Descending 100km Swath Pixel Offset)",
+      "hazardType": "Glacial Lake Outburst Flood (GLOF) Imminent Trigger",
+      "plainEnglishSummary": {
+        "crisis": "Record summer heat melted 4.2 million m³ of glacier ice. Meltwater lubricated the glacier bedrock, triggering a 325 m/yr surge ramming directly into an unstable earthen dam holding back 12.4M m³ of water.",
+        "whyMissed": "Mountain blizzards and high-altitude cloud cover hid the expanding meltwater lake and crevasse surge from optical view.",
+        "howFound": "DSpace's GOFF pixel-offset radar tracked crevasse speed through blizzard conditions, detecting the 325 m/yr velocity spike and measuring 18 mm/wk dam crest bulging.",
+        "impactBefore": "Catastrophic GLOF breach wave (42,500 m³/s) threatening Atal Tunnel and 18 villages",
+        "impactAfter": "Lake level lowered by 8.5m via siphons • Controlled bedrock spillway opened • 100% GLOF averted",
+        "villagesSaved": 18,
+        "hectaresRecovered": 15400,
+        "economicValueProtected": "₹240 Cr"
+      },
+      "hotspots": [
+        {
+          "id": "h4-1",
+          "number": 1,
+          "name": "Samudra Tapu Glacier Tongue",
+          "shortName": "Glacier Tongue",
+          "subtitle": "325 m/yr Surge Velocity (Pixel Offset GOFF)",
+          "lat": 32.5200,
+          "lng": 77.3500,
+          "type": "glacier",
+          "scale": "MACRO",
+          "telemetryDelta": "Ice Velocity: 325 m/yr",
+          "actionPrompt": "Analyze Basal Decoupling",
+          "description": "High-pressure meltwater channels eliminate bed friction, causing rapid glacier kinematic wave.",
+          "metricValue": "325 m/yr Velocity"
+        },
+        {
+          "id": "h4-2",
+          "number": 2,
+          "name": "Supraglacial Moraine Lake",
+          "shortName": "Moraine Lake",
+          "subtitle": "12.4M m³ Meltwater Volume (+38% Ablation)",
+          "lat": 32.4800,
+          "lng": 77.3950,
+          "type": "flood",
+          "scale": "MESO",
+          "telemetryDelta": "Volume: 12.4M m³ (+38%)",
+          "actionPrompt": "Model Siphon Evacuation",
+          "description": "Glacial meltwater lake expanded by 38% in single summer, pressing against unstable ice-cored moraine.",
+          "metricValue": "12.4M m³ Volume"
+        },
+        {
+          "id": "h4-3",
+          "number": 3,
+          "name": "Ice-Cored Terminal Moraine Dam",
+          "shortName": "Terminal Dam",
+          "subtitle": "18 mm/wk Bulging Strain Limit",
+          "lat": 32.4500,
+          "lng": 77.4200,
+          "type": "critical",
+          "scale": "MICRO",
+          "telemetryDelta": "Crest Strain: 18 mm/wk",
+          "actionPrompt": "Compute Hydrostatic Limit",
+          "description": "Glacier snout impact and hydrostatic water pressure bulging moraine crest beyond structural shear yield.",
+          "metricValue": "18 mm/wk Bulge"
+        },
+        {
+          "id": "h4-4",
+          "number": 4,
+          "name": "Atal Tunnel South / Hydro Plant",
+          "shortName": "Atal Tunnel / Plant",
+          "subtitle": "42,500 m³/s GLOF Runout Hydrograph",
+          "lat": 32.4100,
+          "lng": 77.3100,
+          "type": "infrastructure",
+          "scale": "MACRO",
+          "telemetryDelta": "Peak Inundation: 42,500 m³/s",
+          "actionPrompt": "Simulate Breach Runout",
+          "description": "Strategic infrastructure downstream that would be submerged within 34 minutes of dam failure.",
+          "metricValue": "42,500 m³/s Wave"
+        }
+      ],
+      "baselineMetrics": {
+        "roughnessHV_dB": -12.1,
+        "dielectricHH_dB": -26.8,
+        "phaseMotion_mm": -88.5,
+        "flowVelocityMs": 1.25,
+        "closurePhaseRad": 0.082,
+        "wlsResidualChi2": 0.044,
+        "unmixedDihedral_s_dB": 1.4
+      },
+      "mitigatedMetrics": {
+        "roughnessHV_dB": -16.8,
+        "dielectricHH_dB": -18.2,
+        "phaseMotion_mm": -22.0,
+        "flowVelocityMs": 0.45,
+        "closurePhaseRad": 0.018,
+        "confidenceScore": 96.0
+      },
+      "mitigationPlan": {
+        "actionTitle": "Siphon Drain 4.2M m³ & Blast Controlled Bedrock Spillway",
+        "actionDescription": "Helicopter-deploy 6 heavy HDPE 600mm siphons to lower lake depth by 8.5m and open a reinforced granite bypass spillway.",
+        "predictedRecoveryDays": 21
+      }
+    }
+  ]
+}

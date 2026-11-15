@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-void: #03070E;
+  --color-surface: rgba(8, 14, 26, 0.85);
+  --color-border-hairline: rgba(0, 240, 255, 0.18);
+  --color-border-glow: rgba(0, 240, 255, 0.45);
+  --color-cyan: #00F0FF;
+  --color-magenta: #FF2A85;
+  --color-amber: #FFB800;
+  --color-crimson: #FF1E56;
+  --color-emerald: #00E676;
+}
+
+body {
+  background-color: #03070E;
+  color: #F1F5F9;
+  font-family: 'Inter', 'Space Grotesk', sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dark-mode satellite map filter */
+.dark-satellite-filter {
+  filter: brightness(0.68) contrast(1.22) saturate(0.85) hue-rotate(185deg);
+}
+
+/* Custom Leaflet overrides */
+.leaflet-container {
+  background-color: #03070E !important;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.custom-beacon-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Glowing text */
+.glow-text-cyan {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.65), 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.glow-text-emerald {
+  text-shadow: 0 0 10px rgba(0, 230, 118, 0.65);
+}
+
+.glow-text-amber {
+  text-shadow: 0 0 10px rgba(255, 184, 0, 0.65);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(3, 7, 14, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.25);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.55);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
