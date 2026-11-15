@@ -11,9 +11,11 @@ import {
   AlertCircle,
   CheckCircle2,
   Cpu,
-  RefreshCw
+  RefreshCw,
+  Volume2
 } from 'lucide-react';
 import { AOIScenario, HotspotBeacon } from '../../types';
+import { voiceTourEngine } from '../../services/voiceTourEngine';
 
 interface GroqChatbotDrawerProps {
   isOpen: boolean;
@@ -195,6 +197,11 @@ Provide precise, authoritative, highly engaging answers with exact numbers and c
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    voiceTourEngine.stop();
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] bg-slate-950/60 backdrop-blur-sm flex justify-end select-none animate-fadeIn">
       <div className="relative w-full max-w-lg h-full bg-[#040810] border-l border-cyan-electric/40 shadow-2xl text-slate-100 flex flex-col justify-between overflow-hidden">
@@ -220,7 +227,7 @@ Provide precise, authoritative, highly engaging answers with exact numbers and c
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -261,19 +268,32 @@ Provide precise, authoritative, highly engaging answers with exact numbers and c
                 m.sender === 'user' ? 'self-end items-end' : 'self-start items-start'
               }`}
             >
-              <div className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400">
+              <div className="flex items-center justify-between w-full text-[9px] font-mono text-slate-400 gap-2">
                 {m.sender === 'ai' ? (
                   <>
-                    <Cpu className="w-3 h-3 text-cyan-electric" />
-                    <span className="text-cyan-electric font-bold">DSPACE AI</span>
+                    <div className="flex items-center gap-1.5">
+                      <Cpu className="w-3 h-3 text-cyan-electric" />
+                      <span className="text-cyan-electric font-bold">DSPACE AI</span>
+                      <span>• {m.timestamp}</span>
+                    </div>
+                    <button
+                      onClick={() => voiceTourEngine.speak(m.text)}
+                      className="flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-electric/15 text-cyan-electric hover:bg-cyan-electric/30 transition-all border border-cyan-electric/30"
+                      title="Speak AI response out loud"
+                    >
+                      <Volume2 className="w-2.5 h-2.5" />
+                      <span>🔊 Listen</span>
+                    </button>
                   </>
                 ) : (
                   <>
-                    <User className="w-3 h-3 text-slate-300" />
-                    <span>YOU</span>
+                    <div className="flex items-center gap-1.5">
+                      <User className="w-3 h-3 text-slate-300" />
+                      <span>YOU</span>
+                      <span>• {m.timestamp}</span>
+                    </div>
                   </>
                 )}
-                <span>• {m.timestamp}</span>
               </div>
               <div
                 className={`p-3 rounded-2xl text-xs font-sans leading-relaxed ${
@@ -338,3 +358,4 @@ Provide precise, authoritative, highly engaging answers with exact numbers and c
     </div>
   );
 };
+

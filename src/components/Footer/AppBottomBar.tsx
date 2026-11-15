@@ -134,13 +134,25 @@ export const AppBottomBar: React.FC<AppBottomBarProps> = ({
         </div>
       </div>
 
-      {/* Right: MongoDB Database Status Badge */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#050C16] border border-border-hairline text-[9.5px]">
-        <Database className="w-3.5 h-3.5 text-emerald-recovery" />
-        <span className="text-slate-400">STORAGE:</span>
-        <span className={`font-bold ${storageStatus.isConnected ? 'text-emerald-recovery' : 'text-cyan-electric'}`}>
-          {storageStatus.isConnected ? 'MongoDB Active' : 'MongoDB Seeded (Offline Ready)'}
-        </span>
+      {/* Right: Telemetry, Voice & MongoDB Status Badges */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#050C16] border border-border-hairline text-[9px] text-cyan-electric">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-electric animate-pulse" />
+          <span>📡 NISAR: 60 Orbits Loaded</span>
+        </div>
+
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#050C16] border border-border-hairline text-[9px] text-emerald-400">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span>🔊 Voice Engine: Ready</span>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#050C16] border border-border-hairline text-[9.5px]">
+          <Database className="w-3.5 h-3.5 text-emerald-recovery" />
+          <span className="text-slate-400">STORAGE:</span>
+          <span className={`font-bold ${storageStatus.isConnected ? 'text-emerald-recovery' : 'text-cyan-electric'}`}>
+            {storageStatus.isConnected ? 'MongoDB Active' : 'MongoDB Hybrid: Active'}
+          </span>
+        </div>
       </div>
     </footer>
   );

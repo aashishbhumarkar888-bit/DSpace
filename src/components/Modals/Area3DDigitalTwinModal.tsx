@@ -11,9 +11,12 @@ import {
   Box,
   Compass,
   Sliders,
-  Move
+  Move,
+  Volume2,
+  Home
 } from 'lucide-react';
 import { HotspotBeacon, AOIScenario } from '../../types';
+import { voiceTourEngine } from '../../services/voiceTourEngine';
 
 interface Area3DDigitalTwinModalProps {
   isOpen: boolean;
@@ -42,6 +45,7 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
   const [isAutoRotate, setIsAutoRotate] = useState<boolean>(true);
   const [isExploded, setIsExploded] = useState<boolean>(false);
   const [localMitigation, setLocalMitigation] = useState<boolean>(isMitigationActive);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
   const isDragging = useRef<boolean>(false);
   const lastMousePos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -49,6 +53,35 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
   useEffect(() => {
     setLocalMitigation(isMitigationActive);
   }, [isMitigationActive]);
+
+  useEffect(() => {
+    return () => {
+      voiceTourEngine.stop();
+    };
+  }, []);
+
+  const handleClose = () => {
+    voiceTourEngine.stop();
+    onClose();
+  };
+
+  const handleNarrate3D = () => {
+    if (isSpeaking) {
+      voiceTourEngine.stop();
+      setIsSpeaking(false);
+      return;
+    }
+
+    setIsSpeaking(true);
+    setIsAutoRotate(true);
+    setIsExploded(true);
+
+    const script = `Now inspecting the 3D Digital Twin of the sector. On the top stratum, 24 centimeter radar pierces through the foliage canopy. In the middle stratum, 4.2 million cubic meters of floodwater are trapped behind the highway embankment wall. On the bottom stratum, deep groundwater extraction has dropped the aquifer head, causing 19.4 millimeters per year of skeletal ground subsidence.`;
+
+    voiceTourEngine.speak(script, () => {
+      setIsSpeaking(false);
+    });
+  };
 
   // Handle Mouse Drag Rotation
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -182,9 +215,8 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         { x: -blockSize, y: bY + bH, z: blockSize },
       ], 'rgba(0, 180, 216, 0.25)', '#00F0FF');
 
-      // Underground subsidence arrows (pulsing down)
+      // Underground subsidence arrows
       const pArrow1 = project(-40, bY + 12, 20);
-      const pArrow2 = project(40, bY + 12, 20);
       ctx.fillStyle = localMitigation ? '#00E676' : '#FF2A85';
       ctx.font = 'bold 9.5px "JetBrains Mono"';
       ctx.fillText(localMitigation ? 'STABILIZED: -0.8 mm/yr' : 'AQUIFER COLLAPSE: -19.4 mm/yr', pArrow1.x - 30, pArrow1.y + 16);
@@ -202,8 +234,8 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         { x: -blockSize, y: sY, z: blockSize },
       ], 'rgba(16, 28, 48, 0.95)', 'rgba(0, 240, 255, 0.25)');
 
-      // Raised NH-46 Highway Embankment Wall across center (x from -blockSize to blockSize)
-      const embH = localMitigation ? 10 : 22; // Height of highway embankment
+      // Raised NH-46 Highway Embankment Wall across center
+      const embH = localMitigation ? 10 : 22;
       drawIsoPoly([
         { x: -blockSize, y: sY - embH, z: -10 },
         { x: blockSize, y: sY - embH, z: -10 },
@@ -211,7 +243,6 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         { x: -blockSize, y: sY - embH, z: 15 },
       ], 'rgba(30, 41, 59, 0.98)', '#475569');
 
-      // Embankment front face
       drawIsoPoly([
         { x: -blockSize, y: sY, z: 15 },
         { x: blockSize, y: sY, z: 15 },
@@ -219,7 +250,7 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         { x: -blockSize, y: sY - embH, z: 15 },
       ], 'rgba(51, 65, 85, 0.98)', '#64748b');
 
-      // If mitigation applied: render the cut relief siphon culvert in the wall!
+      // If mitigation applied: render cut relief siphon culvert in the wall!
       if (localMitigation) {
         drawIsoPoly([
           { x: -20, y: sY, z: 16 },
@@ -228,14 +259,13 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
           { x: -20, y: sY - 14, z: 16 },
         ], 'rgba(0, 230, 118, 0.7)', '#00E676');
 
-        // Culvert drainage label
         const pCulvert = project(0, sY - 22, 16);
         ctx.fillStyle = '#00E676';
         ctx.font = 'bold 9px "JetBrains Mono"';
         ctx.fillText('1,200mm RELIEF CULVERT CUT', pCulvert.x - 65, pCulvert.y);
       }
 
-      // Upstream Flooded Basin Water Body (behind embankment)
+      // Upstream Flooded Basin Water Body
       const waterDepth = localMitigation ? 3 : 16;
       drawIsoPoly([
         { x: -blockSize + 15, y: sY - waterDepth, z: -blockSize + 15 },
@@ -261,9 +291,8 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
       // STRATUM 1: ATMOSPHERE & CANOPY LAYER (TOP LAYER)
       // =========================================================================
       const cY = -40 - explodeOffset;
-      const canopyOpacity = Math.max(0.08, 1 - (wavelengthPct / 100)); // Becomes translucent at 24cm radar!
+      const canopyOpacity = Math.max(0.08, 1 - (wavelengthPct / 100));
 
-      // 3D Tree stems and foliage canopy standing in the water basin
       const treeCoords = [
         { x: -70, z: -55 },
         { x: -35, z: -70 },
@@ -275,7 +304,6 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
       ];
 
       treeCoords.forEach((tc) => {
-        // Vertical trunk
         const pBase = project(tc.x, sY - waterDepth, tc.z);
         const pTop = project(tc.x, sY - 32, tc.z);
 
@@ -286,7 +314,7 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         ctx.lineWidth = 2.4;
         ctx.stroke();
 
-        // Dihedral double-bounce reflection ray at water line (when in 24cm radar)
+        // Dihedral double-bounce reflection ray at water line
         if (wavelengthPct > 50) {
           ctx.beginPath();
           const pRayIn = project(tc.x - 22, sY - 50, tc.z);
@@ -298,7 +326,7 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
           ctx.stroke();
         }
 
-        // Foliage Crown Sphere/Puff
+        // Foliage Crown Sphere
         ctx.beginPath();
         ctx.arc(pTop.x, pTop.y, 14, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(34, 197, 94, ${canopyOpacity * 0.75})`;
@@ -307,7 +335,7 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
         ctx.stroke();
       });
 
-      // Monsoon Cloud Deck (floating above at 0% wavelength)
+      // Monsoon Cloud Deck (at 0% wavelength)
       if (canopyOpacity > 0.4) {
         drawIsoPoly([
           { x: -blockSize - 20, y: cY - 20, z: -blockSize - 20 },
@@ -321,17 +349,14 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
       if (isExploded) {
         ctx.font = 'bold 10px "JetBrains Mono"';
 
-        // Top Layer Callout
         const pL1 = project(blockSize + 15, cY - 10, 0);
         ctx.fillStyle = '#00F0FF';
         ctx.fillText('1. CANOPY & CLOUD STRATUM (24cm Piercing)', pL1.x, pL1.y);
 
-        // Mid Layer Callout
         const pL2 = project(blockSize + 15, sY, 0);
         ctx.fillStyle = '#00E676';
         ctx.fillText('2. SURFACE HYDROLOGY & NH-46 EMBANKMENT', pL2.x, pL2.y);
 
-        // Bottom Layer Callout
         const pL3 = project(blockSize + 15, bY + 20, 0);
         ctx.fillStyle = '#FF2A85';
         ctx.fillText('3. SUB-SURFACE AQUIFER & -19.4mm SINKING BOWL', pL3.x, pL3.y);
@@ -352,8 +377,27 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
   return (
     <div className="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 overflow-y-auto select-none animate-fadeIn">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-cyan-electric/40 rounded-2xl p-5 shadow-2xl text-slate-100 flex flex-col gap-4 my-auto">
-        {/* Header */}
+        {/* Sticky Top Navigation Bar */}
         <div className="flex items-center justify-between border-b border-border-hairline pb-3">
+          <button
+            onClick={handleClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-cyan-electric hover:bg-slate-700 hover:text-white font-mono text-xs font-bold transition-all border border-border-hairline shadow-sm"
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>🏠 ← Return to Home Dashboard</span>
+          </button>
+
+          <button
+            onClick={handleClose}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-elevated text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-mono"
+            title="Close [Esc]"
+          >
+            <span>✕ Close [Esc]</span>
+          </button>
+        </div>
+
+        {/* Sector Identity Header */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-cyan-electric/15 border border-cyan-electric/40 text-cyan-electric">
               <Box className="w-6 h-6 animate-pulse" />
@@ -373,11 +417,17 @@ export const Area3DDigitalTwinModal: React.FC<Area3DDigitalTwinModalProps> = ({
             </div>
           </div>
 
+          {/* Voice Narration Button */}
           <button
-            onClick={onClose}
-            className="p-2 rounded-lg bg-surface-elevated text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            onClick={handleNarrate3D}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 border transition-all ${
+              isSpeaking
+                ? 'bg-rose-500/25 text-rose-300 border-rose-500 animate-pulse'
+                : 'bg-cyan-electric/20 text-cyan-electric border-cyan-electric/50 hover:bg-cyan-electric/30'
+            }`}
           >
-            <X className="w-5 h-5" />
+            <Volume2 className="w-4 h-4" />
+            <span>{isSpeaking ? 'Mute Voice' : '🔊 Narrate 3D Model'}</span>
           </button>
         </div>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Printer, ShieldCheck, AlertTriangle, FileText, Download, Building, MapPin, CheckCircle2 } from 'lucide-react';
+import { X, Printer, ShieldCheck, AlertTriangle, FileText, Download, Building, MapPin, CheckCircle2, Home } from 'lucide-react';
 import { AOIScenario } from '../../types';
 
 interface DistrictActionBriefModalProps {
@@ -27,6 +27,25 @@ export const DistrictActionBriefModal: React.FC<DistrictActionBriefModalProps> =
   return (
     <div className="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8 overflow-y-auto select-none animate-fadeIn">
       <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-slate-900 border border-cyan-electric/40 rounded-2xl p-6 shadow-2xl text-slate-100 flex flex-col gap-5 my-auto">
+        {/* Sticky Top Navigation Bar */}
+        <div className="flex items-center justify-between border-b border-border-hairline pb-3">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 text-cyan-electric hover:bg-slate-700 hover:text-white font-mono text-xs font-bold transition-all border border-border-hairline shadow-sm"
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>🏠 ← Return to Home Dashboard</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-elevated text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-mono"
+            title="Close [Esc]"
+          >
+            <span>✕ Close [Esc]</span>
+          </button>
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-hairline pb-4">
           <div className="flex items-center gap-3">

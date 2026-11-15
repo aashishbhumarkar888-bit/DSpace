@@ -177,3 +177,4 @@ export const ScientistAdminLoginModal: React.FC<ScientistAdminLoginModalProps> =
     </div>
   );
 };
+

@@ -83,24 +83,34 @@ Modern Earth observation platforms (Sentinel Hub, Google Earth Engine, NASA Worl
 
 ---
 
-## 🧊 5. Interactive 3D Area Digital Twin
+## 🎙️ 5. Audible Voice-Narrated 60-Second Master Tour
+Clicking **`🎬 1-Min Interactive Tour`** starts an automated, voice-narrated mission control briefing that drives the entire application:
+- **Speech Synthesis (`window.speechSynthesis`):** Spoken aloud in crisp, natural English across 6 synchronized chapters.
+- **Mission Control Chime & Equalizer:** Plays harmonic Web Audio telemetry chimes (880Hz → 1320Hz) on chapter transitions and renders a 16-bar animated cyan audio waveform equalizer.
+- **Full Voice Controls:** Includes `🔊 Voice: ON / MUTE`, `🔁 Replay Audio`, manual Chapter jumping (`1` to `6`), Pause, and Resume.
+- **Synchronized UI Actions:** Automatically moves satellite viewpoints (`map.flyTo`), adjusts the 24cm Wavelength X-Ray slider, launches the 3D Digital Twin, executes the hydraulic solver, and opens the District Collector Action Dossier.
+
+---
+
+## 🧊 6. Interactive 3D Area Digital Twin
 
 Clicking any numbered Beacon (`①`–`④`) or the **`🧊 Open 3D Area Model`** button displays a rotatable, high-FPS 3D local sector digital twin with 3 exploded physical strata:
 1. **Top Stratum (Canopy & Atmosphere):** Shows monsoon clouds and 3D trees that turn translucent at 24cm radar wavelength to expose water-trunk double-bounce raypaths.
 2. **Middle Stratum (Surface Hydrology & Infrastructure):** High-resolution topography of the 2km × 2km sector, featuring the raised NH-46 embankment wall, pooled floodwater, and animated drainage velocity vectors.
 3. **Bottom Stratum (Sub-Surface Aquifer & Fault Zone):** 3D geological cross-section revealing the water-table drawdown cone and downward millimeter InSAR subsidence arrows.
 4. **Interactive Fix:** Clicking **`⚡ Test Culvert Cut in 3D`** carves a 1,200mm relief siphon culvert through the embankment wall in real time and drains the water basin.
+5. **Audible Readout:** Features **`🔊 Narrate 3D Model`** button for an immediate spoken breakdown of the physical layer mechanics.
 
 ---
 
-## 🤖 6. Groq AI SAR Copilot & Scientist Authentication
+## 🤖 7. Groq AI SAR Copilot & Scientist Authentication
 
-- **`🤖 Ask DSpace AI`:** Slide-over assistant powered by Groq's `llama-3.3-70b-versatile` endpoint. Users can input a Groq API Key or use the rich built-in context-aware physics knowledge base for instant answers to technical questions.
-- **`🔐 Scientist & Admin Portal`:** Gated behind access credentials (`scientist@nisar.space` / `NISAR-2026`) with an instant **`⚡ Instant Judge / Scientist Demo Login (1-Click Bypass)`** button that unlocks Level-4 SAR telemetry, WLS covariance calibration sliders, and raw MongoDB data inspection.
+- **`🤖 Ask DSpace AI`:** Slide-over assistant powered by Groq's `llama-3.3-70b-versatile` endpoint with `🔊 Listen` voice readout on responses. Users can input a Groq API Key or use the rich built-in context-aware physics knowledge base with 8 instant clickable FAQ chips.
+- **`🔐 Scientist & Admin Portal`:** Gated behind access credentials (`scientist@nisar.space` / `NISAR-2026`) with an instant **`⚡ Instant Judge / Scientist Demo Login (1-Click Bypass)`** button that unlocks Level-4 SAR telemetry, WLS covariance calibration sliders, spatial multilooking (ENL) filters, and raw MongoDB data inspection.
 
 ---
 
-## ⚡ 7. Quick Start (100% Free, Zero API Key Required)
+## ⚡ 8. Quick Start (100% Free, Zero API Key Required)
 
 ```bash
 # 1. Clone the repository

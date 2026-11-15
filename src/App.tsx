@@ -26,7 +26,21 @@ import { Area3DDigitalTwinModal } from './components/Modals/Area3DDigitalTwinMod
 import { ScientistAdminLoginModal } from './components/Modals/ScientistAdminLoginModal';
 import { GroqChatbotDrawer } from './components/Drawers/GroqChatbotDrawer';
 
-import { Play, Pause, Square, ChevronRight, ChevronLeft, CheckCircle2, Award, Activity, Box } from 'lucide-react';
+import { 
+  Play, 
+  Pause, 
+  Square, 
+  ChevronRight, 
+  ChevronLeft, 
+  CheckCircle2, 
+  Award, 
+  Activity, 
+  Box,
+  Volume2,
+  VolumeX,
+  RotateCcw
+} from 'lucide-react';
+import { voiceTourEngine } from './services/voiceTourEngine';
 
 export const App: React.FC = () => {
   // 1. Core State
@@ -93,10 +107,17 @@ export const App: React.FC = () => {
   const [isTourActive, setIsTourActive] = useState<boolean>(false);
   const [isTourPaused, setIsTourPaused] = useState<boolean>(false);
   const [tourElapsedSec, setTourElapsedSec] = useState<number>(0); // 0 to 60
+  const [isVoiceMuted, setIsVoiceMuted] = useState<boolean>(() => voiceTourEngine.getVoiceMuted());
+  const [isVoiceSpeaking, setIsVoiceSpeaking] = useState<boolean>(false);
   const tourIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate current Chapter from elapsed seconds (1 to 6)
   const currentChapter = Math.min(6, Math.floor(tourElapsedSec / 10) + 1);
+
+  // Subscribe to voice engine active state
+  useEffect(() => {
+    return voiceTourEngine.subscribeSpeaking(setIsVoiceSpeaking);
+  }, []);
 
   // Subscribe to storage status
   useEffect(() => {
@@ -163,8 +184,24 @@ export const App: React.FC = () => {
     localStorage.removeItem('dspace_scientist_info');
   };
 
+  // 🎬 Synchronized Voice Scripts for 60-Second Master Tour
+  const CHAPTER_VOICE_SCRIPTS: Record<number, string> = {
+    1: "Welcome to DSpace. In Bhopal's Bhoj wetland, fourteen villages are trapped behind the elevated National Highway 46 embankment. Over-pumping of the deep aquifer is sinking the land by nineteen point four millimeters every year, tilting the canal bed backwards.",
+    2: "Optical satellites like Sentinel-2 are ninety-two percent blinded by monsoon storm clouds. Even standard C-band radar cannot penetrate dense tree leaves. To traditional sensors, this catastrophic water accumulation is completely invisible.",
+    3: "DSpace activates NASA-ISRO NISAR twenty-four centimeter L-band radar. These long waves pass straight through cloud cover and dense tree foliage, striking water on the ground and bouncing off tree trunks with an unmistakable six point two decibel surge.",
+    4: "Our four-observation weighted least squares unmixing eliminates false alarms from wet soil using Triplet Closure Phase. With fourteen ground gauges verified, DSpace achieves an unprecedented zero point zero five two meter depth accuracy—an eighty-two percent error reduction.",
+    5: "Watch our thirty-five millisecond hydraulic solver simulate cutting relief siphons under the highway embankment. Water drains from fifty-eight days down to eleven days, restoring flow across the Narmada canal.",
+    6: "The system generates an official GPS-tagged District Collector Action Dossier. With forty-eight point five crore rupees in crops saved, emergency engineering teams have the exact coordinates needed to resolve the crisis on Monday morning."
+  };
+
   // 🎬 Chapter application handler (Drives map, sliders, 3D twin, solver, dossiers)
   const applyChapterState = (chapter: number) => {
+    // Web Audio Mission Control chime & audible speech synthesis
+    voiceTourEngine.playTelemetryChime();
+    if (!isVoiceMuted) {
+      voiceTourEngine.speak(CHAPTER_VOICE_SCRIPTS[chapter]);
+    }
+
     if (chapter === 1) {
       // Chapter 1: The Coupled Crisis (Problem)
       setActiveTab('story');
@@ -219,6 +256,7 @@ export const App: React.FC = () => {
       setTourElapsedSec((prev) => {
         if (prev >= 59) {
           setIsTourActive(false);
+          voiceTourEngine.stop();
           return 0;
         }
         const next = prev + 1;
@@ -234,7 +272,7 @@ export const App: React.FC = () => {
     return () => {
       if (tourIntervalRef.current) clearInterval(tourIntervalRef.current);
     };
-  }, [isTourActive, isTourPaused]);
+  }, [isTourActive, isTourPaused, isVoiceMuted]);
 
   const startTour = () => {
     setIsTourActive(true);
@@ -244,16 +282,58 @@ export const App: React.FC = () => {
   };
 
   const stopTour = () => {
+    voiceTourEngine.stop();
     setIsTourActive(false);
     setIsTourPaused(false);
     setTourElapsedSec(0);
     if (tourIntervalRef.current) clearInterval(tourIntervalRef.current);
   };
 
+  const toggleTourPause = () => {
+    setIsTourPaused((prev) => {
+      const next = !prev;
+      if (next) {
+        voiceTourEngine.stop();
+      } else {
+        if (!isVoiceMuted) {
+          voiceTourEngine.speak(CHAPTER_VOICE_SCRIPTS[currentChapter]);
+        }
+      }
+      return next;
+    });
+  };
+
   const jumpToChapter = (chapter: number) => {
     const sec = (chapter - 1) * 10;
     setTourElapsedSec(sec);
     applyChapterState(chapter);
+  };
+
+  const toggleVoiceMute = () => {
+    const nextMuted = !isVoiceMuted;
+    setIsVoiceMuted(nextMuted);
+    voiceTourEngine.setVoiceMuted(nextMuted);
+    if (!nextMuted) {
+      voiceTourEngine.speak(CHAPTER_VOICE_SCRIPTS[currentChapter]);
+    }
+  };
+
+  const replayAudio = () => {
+    voiceTourEngine.speak(CHAPTER_VOICE_SCRIPTS[currentChapter]);
+  };
+
+  const handleReturnHome = () => {
+    voiceTourEngine.stop();
+    setIsTourActive(false);
+    setIsTourPaused(false);
+    setIsDistrictBriefOpen(false);
+    setIs3DTwinOpen(false);
+    setIsGroqDrawerOpen(false);
+    setIsScientistLoginOpen(false);
+    setActiveTab('story');
+    setUserMode('simple');
+    setWavelengthPct(100);
+    setIsMitigationActive(false);
   };
 
   // Chapter metadata
@@ -323,6 +403,7 @@ export const App: React.FC = () => {
         onOpenLoginModal={() => setIsScientistLoginOpen(true)}
         onLogoutScientist={handleLogoutScientist}
         onOpenGroqChatbot={() => setIsGroqDrawerOpen(true)}
+        onReturnHome={handleReturnHome}
       />
 
       {/* ROW 2: 48px Wavelength X-Ray Bar */}
@@ -357,8 +438,8 @@ export const App: React.FC = () => {
           {/* 🎬 UNIFIED 60-SECOND INTERACTIVE MASTER TOUR HUD (Mounted strictly inside Left Map Column!) */}
           {isTourActive && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[500] w-[94%] max-w-2xl bg-slate-950/95 border border-cyan-500/50 rounded-xl p-3.5 shadow-2xl backdrop-blur-xl flex flex-col gap-2 animate-fadeIn whitespace-normal break-words">
-              {/* Top Toolbar: Live Time + Chapter Tabs + Controls */}
-              <div className="flex items-center justify-between border-b border-border-hairline pb-2">
+              {/* Top Toolbar: Live Time + 16-Bar Equalizer + Voice Controls + Prev/Play/Next/Exit */}
+              <div className="flex items-center justify-between border-b border-border-hairline pb-2 gap-2 flex-wrap sm:flex-nowrap">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-electric animate-ping" />
                   <span className="text-xs font-mono font-black text-cyan-electric tracking-wider">
@@ -367,10 +448,51 @@ export const App: React.FC = () => {
                   <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-elevated text-emerald-400 font-bold tabular-nums border border-border-hairline">
                     {formatTime(tourElapsedSec)} / 01:00
                   </span>
+
+                  {/* 16-Bar Cyan Audio Waveform Equalizer */}
+                  <div 
+                    className="hidden sm:flex items-center gap-[2px] h-4 px-1.5 py-0.5 rounded bg-black/50 border border-cyan-electric/30"
+                    title={isVoiceSpeaking ? "Voice Narrator Speaking" : "Voice Idle"}
+                  >
+                    {[...Array(16)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-[2px] rounded-full transition-all duration-150 ${
+                          isVoiceSpeaking ? 'bg-cyan-electric shadow-glow-cyan' : 'bg-slate-700 h-1'
+                        }`}
+                        style={{
+                          height: isVoiceSpeaking
+                            ? `${Math.max(3, Math.sin((i + tourElapsedSec * 3) * 0.9) * 10 + 5)}px`
+                            : '3px',
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                {/* Prev / Play-Pause / Next / Exit */}
+                {/* Voice ON/MUTE + Replay + Prev / Play-Pause / Next / Exit */}
                 <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={toggleVoiceMute}
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold flex items-center gap-1 border transition-all ${
+                      !isVoiceMuted
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-400 border-border-hairline'
+                    }`}
+                    title={isVoiceMuted ? 'Unmute voice narrator' : 'Mute voice narrator'}
+                  >
+                    {!isVoiceMuted ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+                    <span>{!isVoiceMuted ? 'Voice ON' : 'Muted'}</span>
+                  </button>
+
+                  <button
+                    onClick={replayAudio}
+                    className="p-1 rounded bg-surface-elevated text-slate-300 hover:text-cyan-electric border border-border-hairline"
+                    title="Replay Voice Narration"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </button>
+
                   <button
                     onClick={() => jumpToChapter(Math.max(1, currentChapter - 1))}
                     disabled={currentChapter === 1}
@@ -381,7 +503,7 @@ export const App: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => setIsTourPaused((prev) => !prev)}
+                    onClick={toggleTourPause}
                     className="px-2.5 py-1 rounded bg-cyan-electric text-slate-950 text-xs font-mono font-bold flex items-center gap-1 hover:bg-cyan-400"
                   >
                     {isTourPaused ? <Play className="w-3 h-3 fill-current" /> : <Pause className="w-3 h-3 fill-current" />}

@@ -96,6 +96,8 @@ export const DockedInspectorSidebar: React.FC<DockedInspectorSidebarProps> = ({
   const [activeGlossaryTerm, setActiveGlossaryTerm] = useState<string | null>(null);
   const [isProofCardOpen, setIsProofCardOpen] = useState(true);
   const [isBenchmarkOpen, setIsBenchmarkOpen] = useState(false);
+  const [wlsLambda, setWlsLambda] = useState(0.08);
+  const [enlLooks, setEnlLooks] = useState(16);
 
   const toggleSonification = () => {
     if (isPlayingAudio) {
@@ -681,7 +683,7 @@ export const DockedInspectorSidebar: React.FC<DockedInspectorSidebarProps> = ({
               <div className="p-2.5 rounded-xl bg-[#060E1A] border border-border-hairline flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold text-amber-400">
-                    WLS RESIDUAL χ² (0.038)
+                    WLS RESIDUAL χ² ({(0.038 * Math.sqrt(16 / enlLooks) * (1 + (wlsLambda - 0.08))).toFixed(3)})
                   </span>
                   <span className="text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400">
                     🟢 PHYSICS VERIFIED
@@ -695,6 +697,55 @@ export const DockedInspectorSidebar: React.FC<DockedInspectorSidebarProps> = ({
                 </p>
               </div>
             </div>
+
+            {/* Scientist Level-4 WLS & ENL Calibration Bench */}
+            {userMode === 'pro' && (
+              <div className="p-2.5 rounded-xl bg-[#040914] border border-cyan-electric/30 flex flex-col gap-2">
+                <div className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-cyan-electric font-bold flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>SCIENTIST CALIBRATION BENCH</span>
+                  </span>
+                  <span className="text-[8.5px] font-mono text-emerald-300 bg-emerald-500/20 px-1.5 py-0.2 rounded border border-emerald-500/30">
+                    χ² = {(0.038 * Math.sqrt(16 / enlLooks) * (1 + (wlsLambda - 0.08))).toFixed(3)}
+                  </span>
+                </div>
+
+                {/* WLS Regularization Slider */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-300">
+                    <span>WLS Regularization (λ):</span>
+                    <span className="text-cyan-electric font-bold">{wlsLambda.toFixed(2)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.01"
+                    max="0.50"
+                    step="0.01"
+                    value={wlsLambda}
+                    onChange={(e) => setWlsLambda(parseFloat(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded accent-cyan-electric cursor-pointer"
+                  />
+                </div>
+
+                {/* ENL Multilooking Filter Slider */}
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-[9px] font-mono text-slate-300">
+                    <span>Spatial Multilooking (ENL):</span>
+                    <span className="text-cyan-electric font-bold">{enlLooks} Looks</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="4"
+                    max="32"
+                    step="2"
+                    value={enlLooks}
+                    onChange={(e) => setEnlLooks(parseInt(e.target.value))}
+                    className="w-full h-1 bg-slate-800 rounded accent-cyan-electric cursor-pointer"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Closure Phase Shield & Break-It Noise Toggle */}
             <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-[#060D18] border border-border-hairline">

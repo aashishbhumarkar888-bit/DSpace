@@ -30,6 +30,7 @@ interface AppHeaderProps {
   onOpenLoginModal?: () => void;
   onLogoutScientist?: () => void;
   onOpenGroqChatbot?: () => void;
+  onReturnHome?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -46,6 +47,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onOpenLoginModal,
   onLogoutScientist,
   onOpenGroqChatbot,
+  onReturnHome,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -66,7 +68,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   return (
     <header className="w-full h-14 bg-slate-950/95 backdrop-blur-xl border-b border-border-hairline px-4 flex items-center justify-between gap-3 z-30 select-none whitespace-nowrap overflow-x-auto">
       {/* LEFT: Compact Brand Emblem & Engine Badge */}
-      <div className="flex items-center gap-2.5 flex-shrink-0">
+      <div 
+        onClick={onReturnHome}
+        className="flex items-center gap-2.5 flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+        title="Return to Home Dashboard"
+      >
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-electric/15 border border-cyan-electric/40 shadow-glow-cyan">
           <Satellite className="w-4 h-4 text-cyan-electric animate-pulse" />
         </div>
