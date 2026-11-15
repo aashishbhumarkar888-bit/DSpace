@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ScaleLevel, 
   AOIId, 
@@ -21,6 +21,9 @@ import { AppBottomBar } from './components/Footer/AppBottomBar';
 import { WelcomeOnboardingModal } from './components/Modals/WelcomeOnboardingModal';
 import { ShortcutsModal } from './components/Modals/ShortcutsModal';
 import { FieldPackModal } from './components/Modals/FieldPackModal';
+import { DistrictActionBriefModal } from './components/Modals/DistrictActionBriefModal';
+
+import { Play, Square, ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   // 1. Core State
@@ -69,6 +72,12 @@ export const App: React.FC = () => {
   const [isWelcomeModalOpen, setIsWelcomeModalOpen] = useState<boolean>(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
   const [isFieldPackOpen, setIsFieldPackOpen] = useState<boolean>(false);
+  const [isDistrictBriefOpen, setIsDistrictBriefOpen] = useState<boolean>(false);
+
+  // 🎬 Auto-Guided 25s Story Walkthrough State
+  const [isTourActive, setIsTourActive] = useState<boolean>(false);
+  const [tourStep, setTourStep] = useState<number>(1);
+  const tourTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Subscribe to storage status
   useEffect(() => {
@@ -118,8 +127,78 @@ export const App: React.FC = () => {
     }
   };
 
+  // 🎬 25s Auto-Story Progression
+  const applyTourStep = (step: number) => {
+    setTourStep(step);
+    if (step === 1) {
+      setWavelengthPct(0); // Show clouds
+      setIsLoupeActive(false);
+      setActiveTab('story');
+      setIsMitigationActive(false);
+      setSelectedHotspot(currentAOI.hotspots[0]);
+    } else if (step === 2) {
+      setWavelengthPct(100); // 24cm Radar pierce
+      setActiveTab('story');
+      setSelectedHotspot(currentAOI.hotspots[0]);
+    } else if (step === 3) {
+      setActiveTab('cascade');
+      setScaleLevel('MICRO');
+      setSelectedHotspot(currentAOI.hotspots[1] || currentAOI.hotspots[0]);
+    } else if (step === 4) {
+      setActiveTab('story');
+      if (!isMitigationActive) {
+        setIsMitigationActive(true);
+      }
+      setIsDistrictBriefOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!isTourActive) {
+      if (tourTimerRef.current) clearInterval(tourTimerRef.current);
+      return;
+    }
+
+    applyTourStep(tourStep);
+
+    tourTimerRef.current = setInterval(() => {
+      setTourStep((prev) => {
+        if (prev >= 4) {
+          setIsTourActive(false);
+          return 1;
+        }
+        const next = prev + 1;
+        applyTourStep(next);
+        return next;
+      });
+    }, 6200);
+
+    return () => {
+      if (tourTimerRef.current) clearInterval(tourTimerRef.current);
+    };
+  }, [isTourActive, tourStep]);
+
+  const toggleTour = () => {
+    if (isTourActive) {
+      setIsTourActive(false);
+      if (tourTimerRef.current) clearInterval(tourTimerRef.current);
+    } else {
+      setIsTourActive(true);
+      setTourStep(1);
+      applyTourStep(1);
+    }
+  };
+
+  // Tour captions
+  const TOUR_CAPTIONS: Record<number, string> = {
+    1: 'Step 1/4: Optical Satellites Blinded ☁️ — Heavy monsoon clouds block 92% of visible light, hiding the flooded basin from ordinary disaster response teams.',
+    2: 'Step 2/4: DSpace 24cm Radar Pierces Clouds ⚡ — NISAR L-band wavelength bounces off tree trunks standing in water (+6.2 dB), exposing 4.2M m³ of stagnant flood.',
+    3: 'Step 3/4: Causal Cascade Identified 🔗 — NH-46 embankment acts as an artificial dam while over-pumped aquifers sink the canal bed by -19.4 mm/year.',
+    4: 'Step 4/4: Solution Applied & Action Dossier Ready 📋 — Sluice gate opened, draining the stagnant trap and protecting 14 villages & 6,200 ha cropland!',
+  };
+
   return (
-    <div className="h-screen w-screen overflow-hidden grid grid-rows-[56px_48px_1fr_64px] bg-[#03070E] text-slate-100 font-sans select-none">
+    <div className="h-screen w-screen overflow-hidden grid grid-rows-[56px_48px_1fr_64px] bg-[#03070E] text-slate-100 font-sans select-none relative">
       {/* ROW 1: 56px Header (Logo, Simple/Pro Switcher, Location Dropdown, Tour CTA) */}
       <AppHeader
         currentAOI={currentAOI}
@@ -128,6 +207,8 @@ export const App: React.FC = () => {
         userMode={userMode}
         setUserMode={setUserMode}
         onOpenHowItWorks={() => setIsWelcomeModalOpen(true)}
+        isTourActive={isTourActive}
+        onToggleTour={toggleTour}
       />
 
       {/* ROW 2: 48px Wavelength X-Ray Bar (1. Normal Camera -> 2. Standard Radar -> 3. DSpace Radar) */}
@@ -139,7 +220,7 @@ export const App: React.FC = () => {
       />
 
       {/* ROW 3: 1fr Main Workspace (Locked 2 Columns: 1fr Map on Left + 390px Docked Sidebar on Right) */}
-      <main className="grid grid-cols-[1fr_390px] h-full min-h-0 overflow-hidden p-2 gap-2">
+      <main className="grid grid-cols-[1fr_390px] h-full min-h-0 overflow-hidden p-2 gap-2 relative">
         {/* Left Column: Real Satellite & Radar Physics Map with Numbered Beacons (①, ②, ③, ④) */}
         <section className="h-full w-full min-w-0 overflow-hidden relative">
           <RealSatelliteMap
@@ -175,8 +256,65 @@ export const App: React.FC = () => {
             isBreakItNoiseActive={isBreakItNoiseActive}
             setIsBreakItNoiseActive={setIsBreakItNoiseActive}
             timeEpochIndex={currentEpochIndex}
+            onOpenDistrictBrief={() => setIsDistrictBriefOpen(true)}
           />
         </section>
+
+        {/* 🎬 Bottom-Center Auto-Story Teleprompter Bar */}
+        {isTourActive && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-11/12 max-w-2xl bg-slate-950/95 backdrop-blur-2xl border-2 border-cyan-electric rounded-2xl p-3 shadow-2xl shadow-cyan-500/20 flex flex-col gap-2 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-border-hairline pb-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-electric animate-ping" />
+                <span className="text-xs font-mono font-black text-cyan-electric tracking-wider">
+                  🎬 DSPACE 25s STORY TOUR: STEP {tourStep} OF 4
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    const prev = Math.max(1, tourStep - 1);
+                    applyTourStep(prev);
+                  }}
+                  disabled={tourStep === 1}
+                  className="p-1 rounded bg-surface-elevated text-slate-300 disabled:opacity-30 hover:text-white"
+                  title="Previous Step"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    const next = Math.min(4, tourStep + 1);
+                    applyTourStep(next);
+                  }}
+                  disabled={tourStep === 4}
+                  className="p-1 rounded bg-surface-elevated text-slate-300 disabled:opacity-30 hover:text-white"
+                  title="Next Step"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={toggleTour}
+                  className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[10px] font-mono font-bold hover:bg-rose-500/40 ml-1"
+                >
+                  Exit Tour
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs font-sans text-slate-100 font-medium leading-relaxed">
+              {TOUR_CAPTIONS[tourStep]}
+            </p>
+
+            {/* Glowing progress line */}
+            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-electric to-emerald-400 transition-all duration-500"
+                style={{ width: `${(tourStep / 4) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
       </main>
 
       {/* ROW 4: 64px Bottom Timeline Player & Storage Status */}
@@ -206,6 +344,13 @@ export const App: React.FC = () => {
         isOpen={isFieldPackOpen}
         onClose={() => setIsFieldPackOpen(false)}
         currentAOI={currentAOI as any}
+      />
+
+      <DistrictActionBriefModal
+        isOpen={isDistrictBriefOpen}
+        onClose={() => setIsDistrictBriefOpen(false)}
+        currentAOI={currentAOI}
+        isMitigationActive={isMitigationActive}
       />
     </div>
   );

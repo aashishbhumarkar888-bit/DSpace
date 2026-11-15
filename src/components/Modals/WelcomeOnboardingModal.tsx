@@ -104,3 +104,4 @@ export const WelcomeOnboardingModal: React.FC<WelcomeOnboardingModalProps> = ({
     </div>
   );
 };
+

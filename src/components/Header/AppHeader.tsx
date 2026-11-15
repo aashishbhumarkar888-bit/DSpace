@@ -6,7 +6,9 @@ import {
   Maximize, 
   ChevronDown, 
   Sparkles, 
-  Microscope 
+  Microscope,
+  Play,
+  Square
 } from 'lucide-react';
 import { AOIScenario, AOIId, UserViewMode } from '../../types';
 
@@ -17,6 +19,8 @@ interface AppHeaderProps {
   userMode: UserViewMode;
   setUserMode: (mode: UserViewMode) => void;
   onOpenHowItWorks: () => void;
+  isTourActive?: boolean;
+  onToggleTour?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -26,6 +30,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   userMode,
   setUserMode,
   onOpenHowItWorks,
+  isTourActive = false,
+  onToggleTour,
 }) => {
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -58,8 +64,32 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* CENTER: Simple vs. Pro Mode Toggle + AOI Selector */}
-      <div className="flex items-center gap-2">
+      {/* CENTER: Auto-Play Demo + Simple/Pro Mode Toggle + AOI Selector */}
+      <div className="flex items-center gap-2.5">
+        {/* 🎬 25-Second Auto-Guided Story Walkthrough Button */}
+        {onToggleTour && (
+          <button
+            onClick={onToggleTour}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border shadow-lg ${
+              isTourActive
+                ? 'bg-rose-500/25 text-rose-300 border-rose-500 animate-pulse shadow-glow-crimson'
+                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 hover:bg-emerald-500/30 shadow-glow-emerald'
+            }`}
+          >
+            {isTourActive ? (
+              <>
+                <Square className="w-3.5 h-3.5 fill-current" />
+                <span>⏹ Stop Tour</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>🎬 Auto-Play Story (25s Demo)</span>
+              </>
+            )}
+          </button>
+        )}
+
         {/* Simple Guide View vs Pro SAR Telemetry Mode Switcher */}
         <div className="flex items-center bg-[#060D18] border border-border-hairline rounded-lg p-0.5 text-xs font-mono shadow-inner">
           <button

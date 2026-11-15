@@ -14,7 +14,11 @@ Standard optical satellites act like phone cameras—they are **blinded by monso
 
 **DSpace** uses NASA-ISRO's **NISAR L-Band (24 cm)** and **S-Band (9.3 cm)** radar waves like a medical X-Ray for Earth:
 
-1. **✨ Simple Citizen Mode:** Understand any surface crisis in 3 clicks—drag the **Wavelength X-Ray Slider** to peel away clouds and tree leaves, click numbered hotspots (`①`–`④`) on the real satellite map, and click **`⚡ Simulate Solution`** to see how many villages and hectares of cropland are protected.
+1. **✨ Simple Citizen Mode:** Understand any surface crisis in 3 clicks:
+   - **🎬 25s Auto-Story Demo:** Click one button to watch an automated 4-step walkthrough of cloud blindness, radar X-ray reveal, causal cascade attribution, and solution delivery.
+   - **⚖️ Split-Screen Comparison Curtain:** Drag a vertical slider (`◄ | ►`) across the map to see *"What Normal Satellites See (Clouds)"* on the left vs. *"What DSpace 24cm Radar Sees (Ground Truth)"* on the right.
+   - **🟢 Plain-English Translators:** Every complex number (`-19.4 mm/yr`, `+6.2 dB`) is paired with a plain-English translation and color-coded severity meter (`🟢 SAFE`, `🟡 WATCH`, `🔴 CRITICAL`).
+   - **📋 Official District Collector Action Dossier:** Generate a one-click printable NDMA brief with GPS coordinates, engineering prescriptions, and economic impact metrics.
 2. **🔬 Pro Scientist Mode:** Inspect the 3-Vector Microwave Physics Fingerprint (**Roughness $\Delta HV$**, **Dielectric Moisture $\varepsilon$**, and **InSAR Phase Motion $\Delta \phi$**), Triplet Closure Phase ($\Phi = \phi_{12} + \phi_{23} - \phi_{13}$) bias shielding, and real-time Web Audio surface sonification.
 
 ---
@@ -41,18 +45,20 @@ Visit **`http://localhost:5173/`** to view the live DSpace Mission Control.
 
 ---
 
-## 🧭 Core Features
+## 🧭 Core Features & Breakthroughs
 
 | Feature | What It Does |
 |:---|:---|
+| **🎬 25s Auto-Play Story Demo** | Guided 4-step automated walkthrough with a bottom teleprompter bar demonstrating cloud penetration, radar discovery, causal cascade, and solution impact. |
+| **⚖️ Interactive Split-Screen Curtain** | Draggable vertical divider across the satellite map showing optical clouds on the left and 24cm radar sub-canopy water & ground sinking on the right. |
+| **🟢 Plain-English Metric Translators** | Self-explanatory cards with severity meters (`🟢 SAFE`, `🟡 WATCH`, `🔴 CRITICAL`) and plain-English translations for all radar telemetry. |
+| **💡 Tap-to-Learn Micro-Glossary** | Friendly 2-line real-world analogies for technical terms (`Double-Bounce`, `InSAR Phase`, `Closure Phase`, `Manning's Slope`). |
+| **📋 District Collector Action Dossier** | Printable NDMA-compliant executive decision brief with GPS coordinates, SLA, engineering prescriptions, and before/after comparisons. |
 | **Locked CSS Grid Layout** | Zero-overlap viewport shell (`56px` header $\rightarrow$ `48px` X-ray bar $\rightarrow$ `1fr` map/sidebar $\rightarrow$ `64px` timeline). Panels physically cannot collide. |
-| **Real Dark Satellite Map** | Replaces blocky cubes with real high-resolution satellite imagery of Bhopal, Uttarakhand, Kutch, and Himachal with custom radar canvas overlays. |
-| **Spaced Numbered Beacons (`①`, `②`, `③`, `④`)** | Spaced circular pulse beacons placed at least 120px apart over real landmarks with short 2-word pills; clicking reveals rich telemetry in docked cards. |
+| **Real Dark Satellite Map** | Real high-resolution satellite basemap of Bhopal, Uttarakhand, Kutch, and Himachal with custom radar canvas overlays and numbered beacons (`①`–`④`). |
+| **Interactive Map Layer Filters** | 1-click bottom-dock filters to isolate `🌊 Water`, `📉 Sinking`, `🚧 Barrier`, or `🏘️ Villages` dynamically on the canvas. |
 | **3-Scale Switcher (`MICRO` / `MESO` / `MACRO`)** | Tracks millimeter ground subsidence (GUNW), meter-scale sub-canopy floods & crops (GCOV), and kilometer-scale glacier surges (GOFF). |
-| **Wavelength X-Ray Slider & Lens** | Smoothly transitions from `☁️ 1. Normal Camera` (0%) $\rightarrow$ `🌿 2. Standard Radar` (50%) $\rightarrow$ `⚡ 3. DSpace NASA Radar` (100%), with a circular cursor magnifying loupe. |
-| **4 Coupled Real-World Case Studies** | 1. Bhopal Bhoj Wetland & Narmada Agro-Valley • 2. Uttarakhand Wildfire-to-Landslide • 3. Kutch Fault & Canal Stress • 4. Himachal Glacier Surge. |
 | **MongoDB Telemetry Store & Hybrid Adapter** | Stores multi-epoch NISAR telemetry, hotspot coordinates, and simulation logs, with automatic zero-latency fallback to bundled seed JSON. |
-| **First-Time User Onboarding** | 3-card plain-English guided modal explaining the problem, the radar solution, and how to try it in 10 seconds. |
 
 ---
 

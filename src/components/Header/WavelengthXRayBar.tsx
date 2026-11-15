@@ -127,3 +127,4 @@ export const WavelengthXRayBar: React.FC<WavelengthXRayBarProps> = ({
     </div>
   );
 };
+

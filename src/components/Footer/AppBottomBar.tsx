@@ -145,3 +145,4 @@ export const AppBottomBar: React.FC<AppBottomBarProps> = ({
     </footer>
   );
 };
+
